@@ -1,0 +1,21 @@
+WALL_N = 1
+WALL_E = 2
+WALL_S = 4
+WALL_W = 8
+
+ALL_WALLS = WALL_N | WALL_E | WALL_S | WALL_W
+ALL_OPEN = 0
+
+OPPOSITE_WALL = {
+    WALL_N: WALL_S,
+    WALL_E: WALL_W,
+    WALL_S: WALL_N,
+    WALL_W: WALL_E,
+}
+
+DIRECTION_OFFSETS = {
+    WALL_N: (0, -1),
+    WALL_E: (1, 0),
+    WALL_S: (0, 1),
+    WALL_W: (-1, 0),
+}

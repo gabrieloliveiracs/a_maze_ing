@@ -1,6 +1,8 @@
+import sys
 from typing import List, Tuple
 from ascii_renderer import ASCIIRenderer
-
+from parser import parse_config
+from mazegen import Mazegenerator
 def save_maze(grid: List[List[int]], entry: Tuple[int, int],
             exit_point: Tuple[int, int], path: List[Tuple[int, int]],
             file_name: str) -> None:
@@ -31,23 +33,41 @@ def save_maze(grid: List[List[int]], entry: Tuple[int, int],
         arquivo.write(string_caminho + "\n")
 
 def main() -> None:
-    """Simulando MazeGenerator"""
-    fake_grid = [
-        [9, 5, 3, 15, 10],
-        [10, 15, 10, 0, 10],
-        [9, 5, 3, 15, 10],
-        [12, 5, 14, 15, 6],
-    ]
-    fake_entry = (1, 1)
-    fake_exit = (3, 3)
-    fake_path = [(1, 1),(2, 1), (3, 1), (3, 2), (3, 3)]
-    output_file = "output_maze.txt"
-    """Simulando arquivo de saída"""
-    save_maze(fake_grid, fake_entry, fake_exit, fake_path, output_file)
-    """Renderização"""
-    print("\nIniciando...")
-    resultado = ASCIIRenderer(fake_grid, fake_entry, fake_exit, fake_path)
+    config_path = sys.argv[1]
+    print(config_path)
+
+    config = parse_config(config_path)
+
+    print(config)
+
+    maze = Mazegenerator(config)
+    resultado = ASCIIRenderer(
+        grid=maze.grid, 
+        entry=config.entry, 
+        exit_point=config.exit, 
+        path=[]
+    )    
     resultado.interactive_menu()
+    # """Simulando MazeGenerator"""
+    # fake_grid = [
+    # [9,  10, 10, 10, 3],
+    # [5,  12, 10, 6,  5],   
+    # [5,  9,  6,  5,  5],   
+    # [12, 10, 10, 14, 6] 
+    # ]
+    # fake_entry = (0, 0)
+    # fake_exit = (4, 3)
+    # fake_path = [
+    #     (0, 0), (1, 0), (2, 0), (3, 0), (4, 0),
+    #     (4, 1), (3, 1), (3, 2), (3, 3), (4, 3)
+    # ]
+    # output_file = "output_maze.txt"
+    # """Simulando arquivo de saída"""
+    # save_maze(fake_grid, fake_entry, fake_exit, fake_path, output_file)
+    # """Renderização"""
+    # print("\nIniciando...")
+    # resultado = ASCIIRenderer(fake_grid, fake_entry, fake_exit, fake_path)
+    # resultado.interactive_menu()
 
 if __name__ == "__main__":
     main()

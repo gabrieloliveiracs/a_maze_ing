@@ -1,5 +1,5 @@
 from typing import List, Tuple
-
+import os
 class ASCIIRenderer:
     def __init__(self, grid: List[List[int]], entry: Tuple[int, int],
                 exit_point: Tuple[int, int], path: List[Tuple[int, int]]) -> None:
@@ -20,21 +20,21 @@ class ASCIIRenderer:
     def render(self) -> None:
         """Desenhando matriz com unicode!"""
         mapa_caracteres = {
-            0: " ", 1: "╵", 2: "╶", 3: "└", 
-            4: "╷", 5: "│", 6: "┌", 7: "├",
-            8: "╴", 9: "┘", 10: "─", 11: "┴", 
-            12: "┐", 13: "┤", 14: "┬", 15: "┼"
+            0: "  ",  1: "╵ ",  2: " ─", 3: "└─", 
+            4: "╷ ",  5: "│ ",  6: "┌─", 7: "├─",
+            8: "- ",  9: "┘ ", 10: "──", 11: "┴─", 
+            12: "┐ ", 13: "┤ ", 14: "┬─", 15: "██"
         }
 
         for y, linha in enumerate(self.grid):
             for x, brick in enumerate(linha):
                 coordenada = (x, y)
                 if coordenada == self.entry:
-                    print("S", end="")
+                    print("S ", end="")
                 elif coordenada == self.exit_point:
-                    print("E", end="")
+                    print("E ", end="")
                 elif coordenada in self.path and self.show_path:
-                    print(".", end="")
+                    print(". ", end="")
                 else:
                     print(mapa_caracteres.get(brick, " "), end="")
                     #print("#", end="") Unicode ficou ruim, usar esse para ver melhor.
@@ -42,6 +42,7 @@ class ASCIIRenderer:
 
     def interactive_menu(self):
         while True:
+            os.system('clear')
             print("\n")
             self.render()
 
