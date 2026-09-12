@@ -8,7 +8,7 @@ class MazeDisplay:
         self.height = screen_height
         self.bytes_pixel = 4
         self.stride = self.width * self.bytes_pixel
-        self.image_buffer = bytearray(self.heigh * self.stride)
+        self.image_buffer = bytearray(self.height * self.stride)
         self.brick_size = 20
 
     def pixel_color(self, x: int, y: int, color: Tuple[int, int, int]) -> None:

@@ -1,69 +1,164 @@
-from typing import List, Tuple
 import os
+from typing import List, Tuple
+
+from constants import DIRECTION_OFFSETS
+
+Coordinate = Tuple[int, int]
+MazeGrid = List[List[int]]
+
+
+class Colors:
+    """
+    Códigos ANSI usados para formatar e colorir texto no terminal.
+    Sintaxe base: \\033[<código>m
+    """
+    # --- Estilos ---
+    RESET = '\033[0m'  # 0: Remove todas as formatações (restaura a cor padrão)
+    BOLD = '\033[1m'   # 1: Deixa o texto em negrito
+
+    # --- Elementos do Jogo (Fundo + Texto) ---
+    # Família 40 = Cores de Fundo (Background) | Família 30 = Cores de Texto (Foreground)
+    START = '\033[42m\033[30m'  # 42: Fundo Verde    | 30: Texto Preto
+    END = '\033[41m\033[30m'    # 41: Fundo Vermelho | 30: Texto Preto
+    PATH = '\033[43m\033[30m'   # 43: Fundo Amarelo  | 30: Texto Preto
+
+    # --- Opções de Cores das Paredes ---
+    # Família 30 = Cores Normais | Família 90 = Cores Brilhantes (High-intensity)
+    WALLS = [
+        '\033[36m',  # 36: Ciano (Azul claro padrão)
+        '\033[94m',  # 94: Azul Brilhante
+        '\033[95m',  # 95: Magenta Brilhante (Rosa/Roxo)
+        '\033[37m',  # 37: Branco / Cinza Claro
+        '\033[32m'   # 32: Verde
+    ]
+class Symbols:
+    """Caracteres usados para desenhar os elementos do labirinto."""
+    WALL_BLOCK = "██"
+    EMPTY = "  "
+    START_POINT = "SS"
+    EXIT_POINT = "EE"
+    PATH_TRAIL = ".."
+
+
 class ASCIIRenderer:
-    def __init__(self, grid: List[List[int]], entry: Tuple[int, int],
-                exit_point: Tuple[int, int], path: List[Tuple[int, int]]) -> None:
+    """Renderizador ASCII interativo para visualização de labirintos."""
+
+    def __init__(
+        self, 
+        grid: MazeGrid, 
+        entry: Coordinate,
+        exit_point: Coordinate, 
+        path: List[Coordinate]
+    ) -> None:
         self.grid = grid
         self.entry = entry
         self.exit_point = exit_point
         self.path = path
+        
         self.show_path = True
+        self.color_idx = 0
 
-    def compass(self, brick: int) -> List[str]:
-        paredes = []
-        if brick & 1: paredes.append("N")
-        if brick & 2: paredes.append("E")
-        if brick & 4: paredes.append("S")
-        if brick & 8: paredes.append("W")
-        return paredes
+        # Máscaras de bits para identificar onde há paredes lógicas
+        self.mask_north = 0
+        self.mask_south = 0
+        self.mask_east = 0
+        self.mask_west = 0
+        self._map_directional_masks()
+
+    def _map_directional_masks(self) -> None:
+        """Decifra qual número (bit) representa cada direção com base nos eixos X e Y."""
+        for wall_mask, (dx, dy) in DIRECTION_OFFSETS.items():
+            if dy < 0: self.mask_north = wall_mask
+            elif dy > 0: self.mask_south = wall_mask
+            elif dx > 0: self.mask_east = wall_mask
+            elif dx < 0: self.mask_west = wall_mask
+
+    def _has_wall(self, cell_value: int, direction_mask: int) -> bool:
+        """Retorna True se a célula possui uma parede na direção especificada (Bitwise AND)."""
+        return bool(cell_value & direction_mask)
+
+    def _create_blank_expanded_grid(self, wall_char: str) -> List[List[str]]:
+        """
+        Cria a matriz expandida inicial, preenchida inteiramente por paredes.
+        Fórmula: (Salas * 2) + 1 parede final para fechar a borda.
+        """
+        maze_height, maze_width = len(self.grid), len(self.grid[0])
+        expanded_width = (2 * maze_width) + 1
+        expanded_height = (2 * maze_height) + 1
+        
+        return [[wall_char for _ in range(expanded_width)] for _ in range(expanded_height)]
+
+    def _get_cell_visual(self, coord: Coordinate) -> str:
+        """Determina qual visualização de 'chão' deve ser desenhada para uma coordenada."""
+        if coord == self.entry:
+            return f"{Colors.START}{Symbols.START_POINT}{Colors.RESET}"
+        if coord == self.exit_point:
+            return f"{Colors.END}{Symbols.EXIT_POINT}{Colors.RESET}"
+        if coord in self.path and self.show_path:
+            return f"{Colors.PATH}{Symbols.PATH_TRAIL}{Colors.RESET}"
+        
+        return Symbols.EMPTY
 
     def render(self) -> None:
-        """Desenhando matriz com unicode!"""
-        mapa_caracteres = {
-            0: "  ",  1: "╵ ",  2: " ─", 3: "└─", 
-            4: "╷ ",  5: "│ ",  6: "┌─", 7: "├─",
-            8: "- ",  9: "┘ ", 10: "──", 11: "┴─", 
-            12: "┐ ", 13: "┤ ", 14: "┬─", 15: "██"
-        }
+        """Constrói e imprime o labirinto renderizado no terminal."""
+        current_wall_color = Colors.WALLS[self.color_idx]
+        wall_char = f"{current_wall_color}{Symbols.WALL_BLOCK}{Colors.RESET}"
 
-        for y, linha in enumerate(self.grid):
-            for x, brick in enumerate(linha):
-                coordenada = (x, y)
-                if coordenada == self.entry:
-                    print("S ", end="")
-                elif coordenada == self.exit_point:
-                    print("E ", end="")
-                elif coordenada in self.path and self.show_path:
-                    print(". ", end="")
-                else:
-                    print(mapa_caracteres.get(brick, " "), end="")
-                    #print("#", end="") Unicode ficou ruim, usar esse para ver melhor.
-            print()
+        # 1. Começamos com um bloco sólido de paredes
+        display_grid = self._create_blank_expanded_grid(wall_char)
+        
+        # 2. Esculpimos as salas e os caminhos
+        for y, row in enumerate(self.grid):
+            for x, logical_cell in enumerate(row):
 
-    def interactive_menu(self):
+                # Mapeia a coordenada lógica (x, y) para o centro da sala na matriz expandida (ímpares)
+                center_y, center_x = (y * 2) + 1, (x * 2) + 1
+                current_coord = (x, y)
+
+                # Esculpe o chão da sala atual
+                display_grid[center_y][center_x] = self._get_cell_visual(current_coord)
+                
+                # Abre buracos nas paredes conectando as salas (se não houver parede lógica)
+                if not self._has_wall(logical_cell, self.mask_east):
+                    display_grid[center_y][center_x + 1] = Symbols.EMPTY
+                    
+                if not self._has_wall(logical_cell, self.mask_south):
+                    display_grid[center_y + 1][center_x] = Symbols.EMPTY
+                    
+        # 3. Imprime o resultado final
+        for row in display_grid:
+            print("".join(row))
+
+    def interactive_menu(self) -> None:
+        """Loop principal de interação do usuário."""
         while True:
             os.system('clear')
             print("\n")
             self.render()
 
-            print("\n--- Menu interative ---")
+            print(f"\n{Colors.BOLD}--- Menu Interativo ---{Colors.RESET}")
             print("[1] Gerar novo mapa")
-            print("[2] Mostrar/esconder caminho")
-            print("[3] Mudar cor (esperar interface gráfica)")
+            print(f"[2] {'Esconder' if self.show_path else 'Mostrar'} caminho")
+            print("[3] Mudar cor das paredes")
             print("[4] Sair")
 
             try:
-                resposta = int(input("\nEscolha uma opção de 1 a 4: "))
-                if resposta == 1:
+                user_choice = int(input("\nEscolha uma opção de 1 a 4: "))
+                
+                if user_choice == 1:
                     print("\nEsperar MazeGenerator...")
-                elif resposta == 2:
+                    input("Pressione ENTER para continuar...")
+                elif user_choice == 2:
                     self.show_path = not self.show_path
-                elif resposta == 3:
-                    print("\nAguardar interface gráfica...")
-                elif resposta == 4:
+                elif user_choice == 3:
+                    self.color_idx = (self.color_idx + 1) % len(Colors.WALLS)
+                elif user_choice == 4:
                     print("\nEncerrando...")
                     break
                 else:
                     print("\nDigite um número de 1 a 4!")
+                    input("Pressione ENTER para continuar...")
+            
             except ValueError:
-                print("\nDigite somente as opção válidas!")
+                print("\nDigite somente opções válidas (números inteiros)!")
+                input("Pressione ENTER para continuar...")

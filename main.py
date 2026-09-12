@@ -38,9 +38,10 @@ def main() -> None:
 
     config = parse_config(config_path)
 
-    print(config)
+    print(f"Configuração carregada: {config}")
 
     maze = Mazegenerator(config)
+    maze.carve_path()
     resultado = ASCIIRenderer(
         grid=maze.grid, 
         entry=config.entry, 

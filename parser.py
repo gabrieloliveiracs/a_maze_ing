@@ -1,39 +1,55 @@
-import sys
-from config import Config
+# parser.py
+from typing import Tuple
+from mazegen.config import Config
 
-def parse_config(config_path):
-    raw_data = {}
+def parse_config(file_path: str) -> Config:
+    width = height = None
+    entry = exit_point = None
+    output_file = None
+    perfect = None
 
-    try:
-        with open(config_path, 'r') as file:
-            for line in file:
-                line = line.strip()
-                if not line or line.startswith('#'):
-                    continue
-                if '=' in line:
-                    key, value  = line.split('=', 1)
-                    raw_data[key.strip()] = value.strip()
-        width = int(raw_data['WIDTH'])
-        height = int(raw_data['HEIGHT'])
+    with open(file_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
 
-        entry_x, entry_y = map(int, raw_data['ENTRY'].split(','))
-        exit_x, exit_y = map(int, raw_data['EXIT'].split(','))
+            try:
+                key, val = line.split('=', 1)
+                if key == 'WIDTH':
+                    width = int(val)
+                elif key == 'HEIGHT':
+                    height = int(val)
+                elif key == 'ENTRY':
+                    entry = tuple(map(int, val.split(',')))
+                elif key == 'EXIT':
+                    exit_point = tuple(map(int, val.split(',')))
+                elif key == 'OUTPUT_FILE':
+                    output_file = val
+                elif key == 'PERFECT':
+                    perfect = val.lower() == 'true'
+                else:
+                    raise KeyError(key)
+            except KeyError as error:
+                raise ValueError(
+                    f"Chave desconhecida no arquivo config: {error.args[0]}"
+                ) from error
+            except ValueError as error:
+                raise ValueError(
+                    f"Valor inválido na linha config: {line}"
+                ) from error
 
-        perfect = raw_data['PERFECT'].lower == 'true'
-
-        return Config(
-            width=width,
-            height=height,
-            entry=(entry_x, entry_y),
-            exit=(exit_x, exit_y),
-            output_file=raw_data['OUTPUT_FILE'],
-            perfect=perfect
+    if (width is None or height is None or entry is None or exit_point is None
+            or output_file is None or perfect is None):
+        raise ValueError(
+            "Config deve definir WIDTH, HEIGHT, ENTRY, EXIT, OUTPUT_FILE e PERFECT"
         )
 
-    except FileNotFoundError as e:
-        print(f"Error: Configuration file '{config_path}' not found.")
-        sys.exit(1)
-    except (KeyError,  ValueError) as e:
-        print(f"Error: Invalid configuration format. Missing or bad data: {e}")
-        sys.exit
-    
+    return Config(
+        width=width,
+        height=height,
+        entry=entry,
+        exit=exit_point,
+        output_file=output_file,
+        perfect=perfect,
+    )
