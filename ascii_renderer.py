@@ -2,6 +2,8 @@ import os
 from typing import List, Tuple
 
 from constants import DIRECTION_OFFSETS
+from mazegen import MazeGenerator, MazeSolver
+from mazegen import Config
 
 Coordinate = Tuple[int, int]
 MazeGrid = List[List[int]]
@@ -31,30 +33,33 @@ class Colors:
         '\033[37m',  # 37: Branco / Cinza Claro
         '\033[32m'   # 32: Verde
     ]
+
+
 class Symbols:
     """Caracteres usados para desenhar os elementos do labirinto."""
     WALL_BLOCK = "██"
     EMPTY = "  "
-    START_POINT = "SS"
-    EXIT_POINT = "EE"
-    PATH_TRAIL = ".."
+    START_POINT = f"{Colors.START}SS{Colors.RESET}"
+    EXIT_POINT = f"{Colors.START}EE{Colors.RESET}"
+    PATH_TRAIL = f"{Colors.START}..{Colors.RESET}"
 
 
 class ASCIIRenderer:
     """Renderizador ASCII interativo para visualização de labirintos."""
 
     def __init__(
-        self, 
-        grid: MazeGrid, 
+        self,
+        grid: MazeGrid,
         entry: Coordinate,
-        exit_point: Coordinate, 
-        path: List[Coordinate]
+        exit_point: Coordinate,
+        path: List[Coordinate],
+        config: Config
     ) -> None:
         self.grid = grid
         self.entry = entry
         self.exit_point = exit_point
         self.path = path
-        
+        self.config = config
         self.show_path = True
         self.color_idx = 0
 
@@ -68,10 +73,14 @@ class ASCIIRenderer:
     def _map_directional_masks(self) -> None:
         """Decifra qual número (bit) representa cada direção com base nos eixos X e Y."""
         for wall_mask, (dx, dy) in DIRECTION_OFFSETS.items():
-            if dy < 0: self.mask_north = wall_mask
-            elif dy > 0: self.mask_south = wall_mask
-            elif dx > 0: self.mask_east = wall_mask
-            elif dx < 0: self.mask_west = wall_mask
+            if dy < 0:
+                self.mask_north = wall_mask
+            elif dy > 0:
+                self.mask_south = wall_mask
+            elif dx > 0:
+                self.mask_east = wall_mask
+            elif dx < 0:
+                self.mask_west = wall_mask
 
     def _has_wall(self, cell_value: int, direction_mask: int) -> bool:
         """Retorna True se a célula possui uma parede na direção especificada (Bitwise AND)."""
@@ -85,18 +94,18 @@ class ASCIIRenderer:
         maze_height, maze_width = len(self.grid), len(self.grid[0])
         expanded_width = (2 * maze_width) + 1
         expanded_height = (2 * maze_height) + 1
-        
+
         return [[wall_char for _ in range(expanded_width)] for _ in range(expanded_height)]
 
     def _get_cell_visual(self, coord: Coordinate) -> str:
         """Determina qual visualização de 'chão' deve ser desenhada para uma coordenada."""
         if coord == self.entry:
-            return f"{Colors.START}{Symbols.START_POINT}{Colors.RESET}"
+            return Symbols.START_POINT
         if coord == self.exit_point:
-            return f"{Colors.END}{Symbols.EXIT_POINT}{Colors.RESET}"
+            return Symbols.EXIT_POINT
         if coord in self.path and self.show_path:
-            return f"{Colors.PATH}{Symbols.PATH_TRAIL}{Colors.RESET}"
-        
+            return Symbols.PATH_TRAIL
+
         return Symbols.EMPTY
 
     def render(self) -> None:
@@ -106,7 +115,7 @@ class ASCIIRenderer:
 
         # 1. Começamos com um bloco sólido de paredes
         display_grid = self._create_blank_expanded_grid(wall_char)
-        
+
         # 2. Esculpimos as salas e os caminhos
         for y, row in enumerate(self.grid):
             for x, logical_cell in enumerate(row):
@@ -116,15 +125,16 @@ class ASCIIRenderer:
                 current_coord = (x, y)
 
                 # Esculpe o chão da sala atual
-                display_grid[center_y][center_x] = self._get_cell_visual(current_coord)
-                
+                display_grid[center_y][center_x] = self._get_cell_visual(
+                    current_coord)
+
                 # Abre buracos nas paredes conectando as salas (se não houver parede lógica)
                 if not self._has_wall(logical_cell, self.mask_east):
                     display_grid[center_y][center_x + 1] = Symbols.EMPTY
-                    
+
                 if not self._has_wall(logical_cell, self.mask_south):
                     display_grid[center_y + 1][center_x] = Symbols.EMPTY
-                    
+
         # 3. Imprime o resultado final
         for row in display_grid:
             print("".join(row))
@@ -144,10 +154,11 @@ class ASCIIRenderer:
 
             try:
                 user_choice = int(input("\nEscolha uma opção de 1 a 4: "))
-                
+
                 if user_choice == 1:
-                    print("\nEsperar MazeGenerator...")
-                    input("Pressione ENTER para continuar...")
+                    new_maze = MazeGenerator(self.config)
+                    new_maze.carve_path()
+                    self.grid = new_maze.grid
                 elif user_choice == 2:
                     self.show_path = not self.show_path
                 elif user_choice == 3:
@@ -158,7 +169,20 @@ class ASCIIRenderer:
                 else:
                     print("\nDigite um número de 1 a 4!")
                     input("Pressione ENTER para continuar...")
-            
+
             except ValueError:
                 print("\nDigite somente opções válidas (números inteiros)!")
                 input("Pressione ENTER para continuar...")
+    # North = 1  (Binary: 0001)
+    # South = 2  (Binary: 0010)
+    # East  = 4  (Binary: 0100)
+    # West  = 8  (Binary: 1000)
+    #     1001  (The cell value: 9)
+    # &   1000  (The mask for West: 8)
+    # ------
+    #     1000  (The result: 8)
+#   _________________________________
+    #     1001  (The cell value: 9)
+    # &   0100  (The mask for East: 4)
+    #   ------
+    #     0000  (The result: 0)

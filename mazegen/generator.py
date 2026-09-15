@@ -1,18 +1,20 @@
 from .config import Config
 from random import choice
 from constants import (
-    ALL_WALLS, 
-    WALL_N, WALL_E, WALL_S, WALL_W, 
-    OPPOSITE_WALL, 
+    ALL_WALLS,
+    WALL_N, WALL_E, WALL_S, WALL_W,
+    OPPOSITE_WALL,
     DIRECTION_OFFSETS
 )
-class Mazegenerator:
+
+
+class MazeGenerator:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.grid = [
             [ALL_WALLS for _ in range(self.config.width)]
             for _ in range(self.config.height)
-            ]
+        ]
         self.visited = set()
         self.stack = []
 
@@ -50,4 +52,3 @@ class Mazegenerator:
                 self.stack.append((next_x, next_y))
             else:
                 self.stack.pop()
-
