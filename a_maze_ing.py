@@ -4,6 +4,7 @@ from ascii_renderer import ASCIIRenderer
 from parser import parse_config
 from mazegen import MazeGenerator
 from solver import MazeSolver
+from controller import MazeController
 
 
 def main() -> None:
@@ -26,7 +27,8 @@ def main() -> None:
         config=maze.config
     )
 
-    resultado.interactive_menu()
+    controller = MazeController(resultado, config)
+    controller.run()
 
 
 if __name__ == "__main__":
