@@ -2,9 +2,10 @@ import os
 from typing import List, Tuple
 
 from constants import DIRECTION_OFFSETS
-from mazegen import MazeGenerator, MazeSolver
-from mazegen import Config
-
+from mazegen import MazeGenerator
+from solver import MazeSolver
+from config import Config
+from time import sleep
 Coordinate = Tuple[int, int]
 MazeGrid = List[List[int]]
 
@@ -36,7 +37,6 @@ class Colors:
 
 
 class Symbols:
-    """Caracteres usados para desenhar os elementos do labirinto."""
     WALL_BLOCK = "██"
     EMPTY = "  "
     START_POINT = f"{Colors.START}SS{Colors.RESET}"
@@ -45,8 +45,6 @@ class Symbols:
 
 
 class ASCIIRenderer:
-    """Renderizador ASCII interativo para visualização de labirintos."""
-
     def __init__(
         self,
         grid: MazeGrid,
@@ -173,16 +171,3 @@ class ASCIIRenderer:
             except ValueError:
                 print("\nDigite somente opções válidas (números inteiros)!")
                 input("Pressione ENTER para continuar...")
-    # North = 1  (Binary: 0001)
-    # South = 2  (Binary: 0010)
-    # East  = 4  (Binary: 0100)
-    # West  = 8  (Binary: 1000)
-    #     1001  (The cell value: 9)
-    # &   1000  (The mask for West: 8)
-    # ------
-    #     1000  (The result: 8)
-#   _________________________________
-    #     1001  (The cell value: 9)
-    # &   0100  (The mask for East: 4)
-    #   ------
-    #     0000  (The result: 0)

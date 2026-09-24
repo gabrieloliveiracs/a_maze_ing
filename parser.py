@@ -1,6 +1,5 @@
-# parser.py
 from typing import Tuple
-from mazegen.config import Config
+from config import Config
 
 def parse_config(file_path: str) -> Config:
     width = height = None

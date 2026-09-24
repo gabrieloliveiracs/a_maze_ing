@@ -1,4 +1,4 @@
-from .config import Config
+from config import Config
 from random import choice
 from constants import (
     ALL_WALLS,
