@@ -1,6 +1,5 @@
 from typing import List, Tuple
-
-from constants import DIRECTION_OFFSETS
+from mazegen.constants import DIRECTION_OFFSETS
 from config import Config
 
 Coordinate = Tuple[int, int]
@@ -133,5 +132,3 @@ class ASCIIRenderer:
         # 3. Imprime o resultado final
         for row in display_grid:
             print("".join(row))
-
-

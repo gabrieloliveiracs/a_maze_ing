@@ -5,7 +5,7 @@ class MazeSolver:
     def __init__(self, maze: MazeGenerator, algorithm="dead-end-fill"):
         self.maze = maze.grid
         self.path = []
-        self.entry = maze.config.entry
+        self.entry = maze.entry
 
     def _is_dead_end(self, x, y) -> int:
         return self.maze[x][y].bit_count() >= 3

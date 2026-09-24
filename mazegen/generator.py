@@ -1,6 +1,6 @@
-from config import Config
+from typing import Tuple
 from random import choice
-from constants import (
+from .constants import (
     ALL_WALLS,
     WALL_N, WALL_E, WALL_S, WALL_W,
     OPPOSITE_WALL,
@@ -9,11 +9,13 @@ from constants import (
 
 
 class MazeGenerator:
-    def __init__(self, config: Config) -> None:
-        self.config = config
+    def __init__(self, width: int, height: int, entry: Tuple[int, int]) -> None:
+        self.width = width
+        self.height = height
+        self.entry = entry
         self.grid = [
-            [ALL_WALLS for _ in range(self.config.width)]
-            for _ in range(self.config.height)
+            [ALL_WALLS for _ in range(self.width)]
+            for _ in range(self.height)
         ]
         self.visited = set()
         self.stack = []
@@ -24,13 +26,13 @@ class MazeGenerator:
             next_x = x + dx
             next_y = y + dy
 
-            if 0 <= next_x < self.config.width and 0 <= next_y < self.config.height:
+            if 0 <= next_x < self.width and 0 <= next_y < self.height:
                 if (next_x, next_y) not in self.visited:
                     neighbors.append((direction, (next_x, next_y)))
         return neighbors
 
     def carve_path(self) -> None:
-        start_x, start_y = self.config.entry
+        start_x, start_y = self.entry
 
         self.visited.add((start_x, start_y))
         self.stack.append((start_x, start_y))
