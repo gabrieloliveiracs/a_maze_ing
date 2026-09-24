@@ -31,6 +31,11 @@ class Colors:
         '\033[32m'   # 32: Verde
     ]
 
+    # --- Animação (Fundo Brilhante) ---
+    # Família 100 = Cores Brilhantes de Fundo (Bright Background)
+    EXPLORER = '\033[102m\033[30m'  # 102: Fundo Verde Brilhante | 30: Texto Preto
+    TRAIL = '\033[100m'             # 100: Fundo Cinza Escuro
+
 
 class Symbols:
     WALL_BLOCK = "██"
@@ -56,6 +61,9 @@ class ASCIIRenderer:
         self.config = config
         self.show_path = True
         self.color_idx = 0
+        self.visited = None
+        self.current_cell = None
+        self.stack = None
 
         # Máscaras de bits para identificar onde há paredes lógicas
         self.mask_north = 0
@@ -93,6 +101,10 @@ class ASCIIRenderer:
 
     def _get_cell_visual(self, coord: Coordinate) -> str:
         """Determina qual visualização de 'chão' deve ser desenhada para uma coordenada."""
+        if self.current_cell is not None and coord == self.current_cell:
+            return f"{Colors.EXPLORER}  {Colors.RESET}"
+        if self.stack is not None and coord in self.stack:
+            return f"{Colors.TRAIL}  {Colors.RESET}"
         if coord == self.entry:
             return Symbols.START_POINT
         if coord == self.exit_point:
@@ -107,27 +119,58 @@ class ASCIIRenderer:
         current_wall_color = Colors.WALLS[self.color_idx]
         wall_char = f"{current_wall_color}{Symbols.WALL_BLOCK}{Colors.RESET}"
 
-        # 1. Começamos com um bloco sólido de paredes
-        display_grid = self._create_blank_expanded_grid(wall_char)
+        maze_height, maze_width = len(self.grid), len(self.grid[0])
+        expanded_width = (2 * maze_width) + 1
+        expanded_height = (2 * maze_height) + 1
 
-        # 2. Esculpimos as salas e os caminhos
-        for y, row in enumerate(self.grid):
-            for x, logical_cell in enumerate(row):
+        if self.visited is not None:
+            display_grid = [[Symbols.EMPTY for _ in range(expanded_width)]
+                            for _ in range(expanded_height)]
 
-                # Mapeia a coordenada lógica (x, y) para o centro da sala na matriz expandida (ímpares)
-                center_y, center_x = (y * 2) + 1, (x * 2) + 1
-                current_coord = (x, y)
+            for y, row in enumerate(self.grid):
+                for x, logical_cell in enumerate(row):
+                    if (x, y) not in self.visited:
+                        continue
 
-                # Esculpe o chão da sala atual
-                display_grid[center_y][center_x] = self._get_cell_visual(
-                    current_coord)
+                    center_y, center_x = (y * 2) + 1, (x * 2) + 1
 
-                # Abre buracos nas paredes conectando as salas (se não houver parede lógica)
-                if not self._has_wall(logical_cell, self.mask_east):
-                    display_grid[center_y][center_x + 1] = Symbols.EMPTY
+                    display_grid[center_y][center_x] = self._get_cell_visual((x, y))
 
-                if not self._has_wall(logical_cell, self.mask_south):
-                    display_grid[center_y + 1][center_x] = Symbols.EMPTY
+                    if self._has_wall(logical_cell, self.mask_north):
+                        display_grid[center_y - 1][center_x] = wall_char
+                    if self._has_wall(logical_cell, self.mask_south):
+                        display_grid[center_y + 1][center_x] = wall_char
+                    if self._has_wall(logical_cell, self.mask_east):
+                        display_grid[center_y][center_x + 1] = wall_char
+                    if self._has_wall(logical_cell, self.mask_west):
+                        display_grid[center_y][center_x - 1] = wall_char
+
+                    display_grid[center_y - 1][center_x - 1] = wall_char
+                    display_grid[center_y - 1][center_x + 1] = wall_char
+                    display_grid[center_y + 1][center_x - 1] = wall_char
+                    display_grid[center_y + 1][center_x + 1] = wall_char
+        else:
+            # 1. Começamos com um bloco sólido de paredes
+            display_grid = self._create_blank_expanded_grid(wall_char)
+
+            # 2. Esculpimos as salas e os caminhos
+            for y, row in enumerate(self.grid):
+                for x, logical_cell in enumerate(row):
+
+                    # Mapeia a coordenada lógica (x, y) para o centro da sala na matriz expandida (ímpares)
+                    center_y, center_x = (y * 2) + 1, (x * 2) + 1
+                    current_coord = (x, y)
+
+                    # Esculpe o chão da sala atual
+                    display_grid[center_y][center_x] = self._get_cell_visual(
+                        current_coord)
+
+                    # Abre buracos nas paredes conectando as salas (se não houver parede lógica)
+                    if not self._has_wall(logical_cell, self.mask_east):
+                        display_grid[center_y][center_x + 1] = Symbols.EMPTY
+
+                    if not self._has_wall(logical_cell, self.mask_south):
+                        display_grid[center_y + 1][center_x] = Symbols.EMPTY
 
         # 3. Imprime o resultado final
         for row in display_grid:

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Iterator
 from random import choice
 from .constants import (
     ALL_WALLS,
@@ -31,7 +31,7 @@ class MazeGenerator:
                     neighbors.append((direction, (next_x, next_y)))
         return neighbors
 
-    def carve_path(self) -> None:
+    def carve_path(self) -> Iterator[Tuple[int, int]]:
         start_x, start_y = self.entry
 
         self.visited.add((start_x, start_y))
@@ -54,3 +54,5 @@ class MazeGenerator:
                 self.stack.append((next_x, next_y))
             else:
                 self.stack.pop()
+
+            yield (curr_x, curr_y)
