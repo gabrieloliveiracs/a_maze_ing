@@ -19,6 +19,7 @@ class MazeGenerator:
         ]
         self.visited = set()
         self.stack = []
+        self._inject_42()
 
     def _get_unvisited_neighbors(self, x: int, y: int) -> list:
         neighbors = []
@@ -56,3 +57,32 @@ class MazeGenerator:
                 self.stack.pop()
 
             yield (curr_x, curr_y)
+
+    def _inject_42(self) -> None:
+        """Um '42' visível, formado por células fechadas"""
+
+        if  self.width < 9 or self.height < 7:
+            print("Error: Maze size does not allow the '42' pattern.")
+        OFFSETS_42 = [
+        # 4
+        (-3, -2), (-1, -2),
+        (-3, -1), (-1, -1),
+        (-3, 0), (-2, 0), (-1, 0),
+        (-1, 1),
+        (-1, 2),
+        # 2
+        (1, -2), (2, -2), (3, -2),
+        (3, -1),
+        (1, 0), (2, 0), (3, 0),
+        (1, 1),
+        (1, 2), (2, 2), (3, 2)
+        ]
+
+        center_x = self.width // 2
+        center_y = self.height // 2
+
+        for offset_x, offset_y in OFFSETS_42:
+            cell_x = center_x + offset_x
+            cell_y = center_y + offset_y
+
+            self.visited.add((cell_x, cell_y))
