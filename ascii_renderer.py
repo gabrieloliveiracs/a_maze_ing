@@ -22,6 +22,12 @@ class Colors:
         '\033[32m'
     ]
 
+    # --- Cor para o número 42 ---
+    NUMBER_42 = '\033[38;2;231;150;223m\033[0m'  # Utilizado RGB
+
+    # --- Cor para o número 42 ---
+    NUMBER_42 = '\033[38;2;231;150;223m\033[0m'  # Utilizado RGB
+
     EXPLORER = '\033[102m\033[30m'
     TRAIL = '\033[100m'
 
@@ -52,7 +58,7 @@ class ASCIIRenderer:
         self.color_idx = 0
         self.visited = None
         self.current_cell = None
-        self.stack = None
+        self.stack = None        
 
         self.mask_north = 0
         self.mask_south = 0

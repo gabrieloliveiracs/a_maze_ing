@@ -50,7 +50,7 @@ class MazeController:
 
                 self._move_cursor_top()
                 self.renderer.render()
-                time.sleep(0.03)
+                time.sleep(0.001)
         finally:
             self._show_cursor()
 
