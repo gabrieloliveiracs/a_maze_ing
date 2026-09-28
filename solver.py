@@ -15,6 +15,5 @@ class MazeSolver:
             for col in range(len(self.maze[0])):
                 if self._is_dead_end(row, col):
                     # "paint"
-                    print(self.maze[row][col])
                     ...
         ...

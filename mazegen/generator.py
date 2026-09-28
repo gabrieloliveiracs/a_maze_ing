@@ -9,10 +9,12 @@ from .constants import (
 
 
 class MazeGenerator:
-    def __init__(self, width: int, height: int, entry: Tuple[int, int]) -> None:
+    def __init__(self, width: int, height: int, entry: Tuple[int, int],
+                 exit: Tuple[int, int]) -> None:
         self.width = width
         self.height = height
         self.entry = entry
+        self.exit = exit
         self.grid = [
             [ALL_WALLS for _ in range(self.width)]
             for _ in range(self.height)
@@ -61,21 +63,21 @@ class MazeGenerator:
     def _inject_42(self) -> None:
         """Um '42' visível, formado por células fechadas"""
 
-        if  self.width < 9 or self.height < 7:
+        if self.width < 9 or self.height < 7:
             print("Error: Maze size does not allow the '42' pattern.")
         OFFSETS_42 = [
-        # 4
-        (-3, -2), (-1, -2),
-        (-3, -1), (-1, -1),
-        (-3, 0), (-2, 0), (-1, 0),
-        (-1, 1),
-        (-1, 2),
-        # 2
-        (1, -2), (2, -2), (3, -2),
-        (3, -1),
-        (1, 0), (2, 0), (3, 0),
-        (1, 1),
-        (1, 2), (2, 2), (3, 2)
+            # 4
+            (-3, -2), (-1, -2),
+            (-3, -1), (-1, -1),
+            (-3, 0), (-2, 0), (-1, 0),
+            (-1, 1),
+            (-1, 2),
+            # 2
+            (1, -2), (2, -2), (3, -2),
+            (3, -1),
+            (1, 0), (2, 0), (3, 0),
+            (1, 1),
+            (1, 2), (2, 2), (3, 2)
         ]
 
         center_x = self.width // 2
@@ -86,3 +88,44 @@ class MazeGenerator:
             cell_y = center_y + offset_y
 
             self.visited.add((cell_x, cell_y))
+
+    def _get_open_neighbors(self, maze, x, y):
+        open = []
+        for direction, (dx, dy) in DIRECTION_OFFSETS.items():
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < self.width and 0 <= ny < self.height:
+                if (maze[y][x] & direction) == 0:
+                    open.append((direction, (nx, ny)))
+        return open
+
+    def _is_dead_end(self, maze, x, y):
+        return len(self._get_open_neighbors(maze, x, y)) == 1
+
+    def cut_dead_ends(self):
+        dead_ends = []
+
+        for y in range(len(self.grid)):
+            for x in range(len(self.grid[0])):
+                if (x, y) == self.entry or (x, y) == self.exit:
+                    continue
+
+                if self._is_dead_end(self.grid, x, y):
+                    dead_ends.append((x, y))
+
+        while dead_ends:
+            curr_x, curr_y = dead_ends.pop()
+
+            neighbor = self._get_open_neighbors(self.grid, curr_x, curr_y)
+
+            neighbor_direction, (nx, ny) = neighbor[0]
+
+            self.grid[curr_y][curr_x] = ALL_WALLS
+
+            opposite = OPPOSITE_WALL[neighbor_direction]
+            self.grid[ny][nx] += opposite
+
+            yield curr_x, curr_y
+
+            if (nx, ny) != self.entry and (nx, ny) != self.exit:
+                if self._is_dead_end(self.grid, nx, ny):
+                    dead_ends.append((nx, ny))

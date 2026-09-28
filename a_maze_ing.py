@@ -14,7 +14,8 @@ def main() -> None:
 
     config = Config.from_file(config_path)
 
-    maze = MazeGenerator(config.width, config.height, config.entry)
+    maze = MazeGenerator(config.width, config.height,
+                         config.entry, config.exit)
     resultado = ASCIIRenderer(
         grid=maze.grid,
         entry=config.entry,

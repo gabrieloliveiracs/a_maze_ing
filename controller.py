@@ -11,7 +11,7 @@ class MazeController:
         self.config = config
 
     def _clear_screen(self) -> None:
-        print("\033[2J\033[H", end="")
+        print("\033[2J\033[3J\033[H", end="")
 
     def _hide_cursor(self) -> None:
         print("\033[?25l", end="", flush=True)
@@ -38,6 +38,15 @@ class MazeController:
                 self.renderer.visited = maze.visited
                 self.renderer.current_cell = current_position
                 self.renderer.stack = maze.stack
+
+                self._move_cursor_top()
+                self.renderer.render()
+                time.sleep(0.01)
+
+            self._reset_animation_state()
+
+            for current_position in maze.cut_dead_ends():
+                self.renderer.current_cell = current_position
 
                 self._move_cursor_top()
                 self.renderer.render()
@@ -78,7 +87,11 @@ class MazeController:
 
                     if user_choice == 1:
                         new_maze = MazeGenerator(
-                            self.config.width, self.config.height, self.config.entry)
+                            self.config.width,
+                            self.config.height,
+                            self.config.entry,
+                            self.config.exit
+                        )
                         self.process_maze(new_maze)
 
                     elif user_choice == 2:
