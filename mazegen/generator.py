@@ -77,15 +77,38 @@ class MazeGenerator:
                 self.visited.add((cell_x, cell_y))
                 self.pattern_42_cells.add((cell_x, cell_y))
 
-    # def braid(self) -> Iterator[Tuple[int, int]]:
-        # pra cada celula:
-        #     se for entry, exit ou 42:
-        #         pula
+    def braid(self) -> Iterator[Tuple[int, int]]:
+        for y in range(self.height):
+            for x in range(self.width):
+                coord(x, y)
 
-        #     se a célula tiver 3 paredes:
-        #         lista os vizinhos validos (entre 0 e width e height e fora do 42", usar direction offsets)
+            if coord == self.entry or coord == self.exit or coord in self.pattern_42_cells:
+                continue
 
-        #         se tem vizinho valido
-        #             choice(vizinho)
-        #             quebra a parede entre a celula atual e esse vizinho
-        #     (yield) cell atual
+            cell_value = self.grid[y][x]
+
+            wall_count = 0
+            for w in [WALL_N, WALL_E, WALL_S, WALL_W]:
+                if cell_value & w:
+                    well_count += 1
+
+            if wall_count == 3:
+                valid_neighbors = []
+
+                for direction, (dx, dy) in DIRECTION_OFFSETS.items():
+                    next_x = x + dx
+                    next_y = y + dy
+
+                    if 0 <= next_x < self.width and 0 <= next_y < self.height:
+                        if (next_x, next_y) not in self.patter_42_cells:
+                            if cell_value & direction:
+                                valid_neighbors.append((direction, (next_x, next_y)))
+
+                if valid_neighbors:
+                    choosen_direction, (nx, ny) = choice(valid_neighbors)
+                    
+                    self.grid[y][x] &= ~chosen_direction
+                    opposite = OPPOSITE_WALL[chosen_direction]
+                    self.grid[ny][nx] &= ~opposite
+
+        yield coord
