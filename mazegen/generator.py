@@ -103,7 +103,7 @@ class MazeGenerator:
     def _is_dead_end(self, maze, x, y):
         return len(self._get_open_neighbors(maze, x, y)) == 1
 
-    def cut_dead_ends(self):
+    def fill_dead_ends(self):
         dead_ends = []
 
         for y in range(len(self.grid)):

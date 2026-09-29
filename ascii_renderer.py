@@ -54,8 +54,12 @@ class ASCIIRenderer:
         self.color_idx = 0
         self.visited = None
         self.current_cell = None
+<<<<<<< HEAD
         self.stack = None        
         self.pattern_42_cells = set()
+=======
+        self.stack = None
+>>>>>>> 7634a45 (;)
 
         self.mask_north = 0
         self.mask_south = 0
