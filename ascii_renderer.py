@@ -54,12 +54,7 @@ class ASCIIRenderer:
         self.color_idx = 0
         self.visited = None
         self.current_cell = None
-<<<<<<< HEAD
-        self.stack = None        
-        self.pattern_42_cells = set()
-=======
         self.stack = None
->>>>>>> 7634a45 (;)
 
         self.mask_north = 0
         self.mask_south = 0
@@ -103,80 +98,85 @@ class ASCIIRenderer:
         return Symbols.EMPTY
 
     def render(self) -> None:
-        current_wall_color = Colors.WALLS[self.color_idx]
-        wall_char = f"{current_wall_color}{Symbols.WALL_BLOCK}{Colors.RESET}"
+        is_animated = self.visited is not None
+        wall_char = self._get_wall_character()
 
-        maze_height, maze_width = len(self.grid), len(self.grid[0])
+        display_grid = self._initialize_display_grid()
+
+        for maze_y, row in enumerate(self.grid):
+            for maze_x, cell_walls in enumerate(row):
+                coord = (maze_x, maze_y)
+
+                if is_animated and coord not in self.visited:
+                    continue
+
+                display_x, display_y = self._get_display_coordinates(
+                    maze_x, maze_y)
+
+                self._draw_cell(display_grid, display_x, display_y,
+                                cell_walls, coord, wall_char)
+
+        self._apply_pattern_42(display_grid)
+        self._print_grid(display_grid)
+
+    def _get_wall_character(self) -> str:
+        wall_color = Colors.WALLS[self.color_idx]
+        return f"{wall_color}{Symbols.WALL_BLOCK}{Colors.RESET}"
+
+    def _get_display_dimensions(self) -> Tuple[int, int]:
+        maze_height = len(self.grid)
+        maze_width = len(self.grid[0])
+
         expanded_width = (2 * maze_width) + 1
         expanded_height = (2 * maze_height) + 1
 
-        all_walls_mask = self.mask_north | self.mask_south | self.mask_east | self.mask_west
+        return expanded_width, expanded_height
 
-        if self.visited is not None:
-            display_grid = [[Symbols.EMPTY for _ in range(expanded_width)]
-                            for _ in range(expanded_height)]
+    def _initialize_display_grid(self) -> List[List[str]]:
+        width, height = self._get_display_dimensions()
+        return [[Symbols.EMPTY for _ in range(width)] for _ in range(height)]
 
-            for y, row in enumerate(self.grid):
-                for x, logical_cell in enumerate(row):
-                    if (x, y) not in self.visited:
-                        continue
+    def _get_display_coordinates(self, maze_x: int, maze_y: int) -> Tuple[int, int]:
+        return (maze_x * 2) + 1, (maze_y * 2) + 1
 
-                    center_y, center_x = (y * 2) + 1, (x * 2) + 1
-                    current_coord = (x, y)
+    def _draw_cell(self, grid: List[List[str]], cx: int, cy: int, logical_cell: int, coord: Coordinate, wall_char: str) -> None:
+        all_walls = self.mask_north | self.mask_south | self.mask_east | self.mask_west
+        visual = self._get_cell_visual(coord)
 
-                    if current_coord in self.pattern_42_cells:
-                        char_42 = f"{Colors.NUMBER_42}{Symbols.WALL_BLOCK}{Colors.RESET}"
-
-                        for dy in [-1, 0, 1]:
-                            for dx in [-1, 0, 1]:
-                                display_grid[center_y + dy][center_x + dx] = char_42
-                        continue
-
-                    display_grid[center_y][center_x] = self._get_cell_visual(
-                        (x, y))
-
-                    if self._has_wall(logical_cell, self.mask_north):
-                        display_grid[center_y - 1][center_x] = wall_char
-                    if self._has_wall(logical_cell, self.mask_south):
-                        display_grid[center_y + 1][center_x] = wall_char
-                    if self._has_wall(logical_cell, self.mask_east):
-                        display_grid[center_y][center_x + 1] = wall_char
-                    if self._has_wall(logical_cell, self.mask_west):
-                        display_grid[center_y][center_x - 1] = wall_char
-
-                    display_grid[center_y - 1][center_x - 1] = wall_char
-                    display_grid[center_y - 1][center_x + 1] = wall_char
-                    display_grid[center_y + 1][center_x - 1] = wall_char
-                    display_grid[center_y + 1][center_x + 1] = wall_char
+        if visual == Symbols.EMPTY and logical_cell == all_walls:
+            grid[cy][cx] = wall_char
         else:
-            display_grid = self._create_blank_expanded_grid(wall_char)
+            grid[cy][cx] = visual
 
-            for y, row in enumerate(self.grid):
-                for x, logical_cell in enumerate(row):
+        if self._has_wall(logical_cell, self.mask_north):
+            grid[cy - 1][cx] = wall_char
+        if self._has_wall(logical_cell, self.mask_south):
+            grid[cy + 1][cx] = wall_char
+        if self._has_wall(logical_cell, self.mask_east):
+            grid[cy][cx + 1] = wall_char
+        if self._has_wall(logical_cell, self.mask_west):
+            grid[cy][cx - 1] = wall_char
 
-                    center_y, center_x = (y * 2) + 1, (x * 2) + 1
-                    current_coord = (x, y)
-                    visual = self._get_cell_visual(current_coord)
+        grid[cy - 1][cx - 1] = grid[cy - 1][cx + 1] = wall_char
+        grid[cy + 1][cx - 1] = grid[cy + 1][cx + 1] = wall_char
 
-                    if current_coord in self.pattern_42_cells:
-                        char_42 = f"{Colors.NUMBER_42}{Symbols.WALL_BLOCK}{Colors.RESET}"
+    def _apply_pattern_42(self, grid: List[List[str]]) -> None:
+        char_42 = f"{Colors.NUMBER_42}{Symbols.WALL_BLOCK}{Colors.RESET}"
 
-                        for dy in [-1, 0, 1]:
-                            for dx in [-1, 0, 1]:
-                                display_grid[center_y + dy][center_x + dx] = char_42
-                        continue
+        for maze_x, maze_y in self.pattern_42_cells:
+            center_x, center_y = self._get_display_coordinates(maze_x, maze_y)
 
-                    if visual == Symbols.EMPTY and logical_cell == all_walls_mask:
-                        pass
-                    else:
-                        display_grid[center_y][center_x] = self._get_cell_visual(
-                            current_coord)
+            for row_offset in [-1, 0, 1]:
+                for col_offset in [-1, 0, 1]:
+                    target_y = center_y + row_offset
+                    target_x = center_x + col_offset
 
-                    if not self._has_wall(logical_cell, self.mask_east):
-                        display_grid[center_y][center_x + 1] = Symbols.EMPTY
+                    if self._is_within_bounds(grid, target_x, target_y):
+                        grid[target_y][target_x] = char_42
 
-                    if not self._has_wall(logical_cell, self.mask_south):
-                        display_grid[center_y + 1][center_x] = Symbols.EMPTY
+    def _is_within_bounds(self, grid: List[List[str]], x: int, y: int) -> bool:
+        return 0 <= y < len(grid) and 0 <= x < len(grid[0])
 
-        for row in display_grid:
+    def _print_grid(self, grid: List[List[str]]) -> None:
+        for row in grid:
             print("".join(row))

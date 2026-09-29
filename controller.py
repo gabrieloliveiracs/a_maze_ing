@@ -33,6 +33,7 @@ class MazeController:
     def _animate_generation(self, maze: MazeGenerator) -> None:
         self._clear_screen()
         self._hide_cursor()
+        solver = MazeSolver(maze)
 
         try:
             for current_position in maze.carve_path():
@@ -45,8 +46,7 @@ class MazeController:
                 time.sleep(0.01)
 
             self._reset_animation_state()
-
-            for current_position in maze.fill_dead_ends():
+            for current_position in solver.dead_end_fill():
                 self.renderer.current_cell = current_position
 
                 self._move_cursor_top()
@@ -62,7 +62,7 @@ class MazeController:
 
     def _solve_and_attach_path(self, maze: MazeGenerator) -> None:
         solver = MazeSolver(maze)
-        solver.dead_end_fill(maze)
+        list(solver.dead_end_fill())
 
         if hasattr(solver, 'path'):
             self.renderer.path = solver.path

@@ -25,7 +25,7 @@ def main() -> None:
     )
 
     solver = MazeSolver(maze)
-    solver.dead_end_fill(maze)
+    solver.dead_end_fill()
 
     controller = MazeController(resultado, config)
     controller.run(maze)
