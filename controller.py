@@ -45,13 +45,22 @@ class MazeController:
                 self.renderer.render()
                 time.sleep(0.01)
 
+            # if not self.config.perfect:
+            #     self._reset_animation_state()
+            #     for current_position in maze.braid():
+            #         self.renderer.current_cell = current_position
+
+            #         self._move_cursor_top()
+            #         self.renderer.render()
+            #         time.sleep(0.1)
+
             self._reset_animation_state()
             for current_position in solver.dead_end_fill():
                 self.renderer.current_cell = current_position
 
                 self._move_cursor_top()
                 self.renderer.render()
-                time.sleep(0.001)
+                time.sleep(0.01)
         finally:
             self._show_cursor()
 

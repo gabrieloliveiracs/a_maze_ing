@@ -56,6 +56,7 @@ class ASCIIRenderer:
         self.current_cell = None
         self.stack = None
 
+        self.pattern_42_cells = set()
         self.mask_north = 0
         self.mask_south = 0
         self.mask_east = 0

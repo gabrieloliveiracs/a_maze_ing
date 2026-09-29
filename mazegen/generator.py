@@ -75,4 +75,17 @@ class MazeGenerator:
                 cell_y = center_y + offset_y
 
                 self.visited.add((cell_x, cell_y))
-                self.pattern_42_cells.add((cell_x, cell_y)) 
+                self.pattern_42_cells.add((cell_x, cell_y))
+
+    # def braid(self) -> Iterator[Tuple[int, int]]:
+        # pra cada celula:
+        #     se for entry, exit ou 42:
+        #         pula
+
+        #     se a célula tiver 3 paredes:
+        #         lista os vizinhos validos (entre 0 e width e height e fora do 42", usar direction offsets)
+
+        #         se tem vizinho valido
+        #             choice(vizinho)
+        #             quebra a parede entre a celula atual e esse vizinho
+        #     (yield) cell atual
