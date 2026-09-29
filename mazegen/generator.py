@@ -4,7 +4,8 @@ from .constants import (
     ALL_WALLS,
     WALL_N, WALL_E, WALL_S, WALL_W,
     OPPOSITE_WALL,
-    DIRECTION_OFFSETS
+    DIRECTION_OFFSETS,
+    OFFSETS_42
 )
 
 
@@ -66,21 +67,6 @@ class MazeGenerator:
         if self.width < 9 or self.height < 7:
             print("Error: Maze size does not allow the '42' pattern.")
         else:
-            OFFSETS_42 = [
-                # 4
-                (-3, -2),
-                (-3, -1),
-                (-3, 0), (-2, 0), (-1, 0),
-                (-1, 1),
-                (-1, 2),
-                # 2
-                (1, -2), (2, -2), (3, -2),
-                (3, -1),
-                (1, 0), (2, 0), (3, 0),
-                (1, 1),
-                (1, 2), (2, 2), (3, 2)
-            ]
-
             center_x = self.width // 2
             center_y = self.height // 2
 
@@ -89,4 +75,4 @@ class MazeGenerator:
                 cell_y = center_y + offset_y
 
                 self.visited.add((cell_x, cell_y))
-                self.pattern_42_cells.add((cell_x, cell_y))
+                self.pattern_42_cells.add((cell_x, cell_y)) 
