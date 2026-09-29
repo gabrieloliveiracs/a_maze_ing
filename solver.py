@@ -17,19 +17,21 @@ class MazeSolver:
         self.path = []
 
     def _get_open_neighbors(self, maze, x, y):
-        open = []
+        open_neighbors = []
         for direction, (dx, dy) in DIRECTION_OFFSETS.items():
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.width and 0 <= ny < self.height:
                 if (maze[y][x] & direction) == 0:
-                    open.append((direction, (nx, ny)))
-        return open
+                    open_neighbors.append((direction, (nx, ny)))
+        return open_neighbors
 
     def _is_dead_end(self, maze, x, y):
         return len(self._get_open_neighbors(maze, x, y)) == 1
 
     def dead_end_fill(self):
         dead_ends = []
+
+        original_grid = [row[:] for row in self.grid]
 
         for y in range(len(self.grid)):
             for x in range(len(self.grid[0])):
@@ -42,9 +44,9 @@ class MazeSolver:
         while dead_ends:
             curr_x, curr_y = dead_ends.pop()
 
-            neighbor = self._get_open_neighbors(self.grid, curr_x, curr_y)
+            neighbors = self._get_open_neighbors(self.grid, curr_x, curr_y)
 
-            neighbor_direction, (nx, ny) = neighbor[0]
+            neighbor_direction, (nx, ny) = neighbors[0]
 
             self.grid[curr_y][curr_x] = ALL_WALLS
 
@@ -56,3 +58,13 @@ class MazeSolver:
             if (nx, ny) != self.entry and (nx, ny) != self.exit:
                 if self._is_dead_end(self.grid, nx, ny):
                     dead_ends.append((nx, ny))
+
+        self.path = []
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.grid[y][x] != ALL_WALLS:
+                    self.path.append((x, y))
+
+        for y in range(self.height):
+            for x in range(self.width):
+                self.grid[y][x] = original_grid[y][x]

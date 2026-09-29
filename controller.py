@@ -26,14 +26,15 @@ class MazeController:
         self.renderer.grid = maze.grid
         self.renderer.pattern_42_cells = maze.pattern_42_cells
 
-        self._animate_generation(maze)
-        self._reset_animation_state()
-        self._solve_and_attach_path(maze)
+        solver = MazeSolver(maze)
 
-    def _animate_generation(self, maze: MazeGenerator) -> None:
+        self._animate_generation(maze, solver)
+        self._reset_animation_state()
+        self._solve_and_attach_path(solver)
+
+    def _animate_generation(self, maze: MazeGenerator, solver: MazeSolver) -> None:
         self._clear_screen()
         self._hide_cursor()
-        solver = MazeSolver(maze)
 
         try:
             for current_position in maze.carve_path():
@@ -43,16 +44,7 @@ class MazeController:
 
                 self._move_cursor_top()
                 self.renderer.render()
-                time.sleep(0.01)
-
-            # if not self.config.perfect:
-            #     self._reset_animation_state()
-            #     for current_position in maze.braid():
-            #         self.renderer.current_cell = current_position
-
-            #         self._move_cursor_top()
-            #         self.renderer.render()
-            #         time.sleep(0.1)
+                time.sleep(0.0001)
 
             self._reset_animation_state()
             for current_position in solver.dead_end_fill():
@@ -60,7 +52,7 @@ class MazeController:
 
                 self._move_cursor_top()
                 self.renderer.render()
-                time.sleep(0.01)
+                time.sleep(0.0001)
         finally:
             self._show_cursor()
 
@@ -69,10 +61,7 @@ class MazeController:
         self.renderer.current_cell = None
         self.renderer.stack = None
 
-    def _solve_and_attach_path(self, maze: MazeGenerator) -> None:
-        solver = MazeSolver(maze)
-        list(solver.dead_end_fill())
-
+    def _solve_and_attach_path(self, solver: MazeSolver) -> None:
         if hasattr(solver, 'path'):
             self.renderer.path = solver.path
 
