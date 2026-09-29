@@ -22,7 +22,7 @@ class Colors:
         '\033[32m'
     ]
 
-    NUMBER_42 = '\033[31m\033[0m'
+    NUMBER_42 = '\033[31m'
 
     EXPLORER = '\033[102m\033[30m'
     TRAIL = '\033[100m'
@@ -32,8 +32,8 @@ class Symbols:
     WALL_BLOCK = "██"
     EMPTY = "  "
     START_POINT = f"{Colors.START}SS{Colors.RESET}"
-    EXIT_POINT = f"{Colors.START}EE{Colors.RESET}"
-    PATH_TRAIL = f"{Colors.START}..{Colors.RESET}"
+    EXIT_POINT = f"{Colors.END}EE{Colors.RESET}"
+    PATH_TRAIL = f"{Colors.TRAIL}..{Colors.RESET}"
 
 
 class ASCIIRenderer:
@@ -167,22 +167,26 @@ class ASCIIRenderer:
         if self._has_wall(logical_cell, self.mask_north):
             grid[cy - 1][cx] = wall_char
         else:
-            grid[cy - 1][cx] = self._get_passage_visual(coord, (coord[0], coord[1] - 1))
+            grid[cy -
+                 1][cx] = self._get_passage_visual(coord, (coord[0], coord[1] - 1))
 
         if self._has_wall(logical_cell, self.mask_south):
             grid[cy + 1][cx] = wall_char
         else:
-            grid[cy + 1][cx] = self._get_passage_visual(coord, (coord[0], coord[1] + 1))
+            grid[cy +
+                 1][cx] = self._get_passage_visual(coord, (coord[0], coord[1] + 1))
 
         if self._has_wall(logical_cell, self.mask_east):
             grid[cy][cx + 1] = wall_char
         else:
-            grid[cy][cx + 1] = self._get_passage_visual(coord, (coord[0] + 1, coord[1]))
+            grid[cy][cx +
+                     1] = self._get_passage_visual(coord, (coord[0] + 1, coord[1]))
 
         if self._has_wall(logical_cell, self.mask_west):
             grid[cy][cx - 1] = wall_char
         else:
-            grid[cy][cx - 1] = self._get_passage_visual(coord, (coord[0] - 1, coord[1]))
+            grid[cy][cx -
+                     1] = self._get_passage_visual(coord, (coord[0] - 1, coord[1]))
 
         # corners
         grid[cy - 1][cx - 1] = grid[cy - 1][cx + 1] = wall_char

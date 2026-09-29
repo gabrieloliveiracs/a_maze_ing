@@ -27,7 +27,6 @@ class MazeController:
         self.renderer.pattern_42_cells = maze.pattern_42_cells
 
         solver = MazeSolver(maze)
-
         self._animate_generation(maze, solver)
         self._reset_animation_state()
         self._solve_and_attach_path(solver)
@@ -35,7 +34,6 @@ class MazeController:
     def _animate_generation(self, maze: MazeGenerator, solver: MazeSolver) -> None:
         self._clear_screen()
         self._hide_cursor()
-
         try:
             for current_position in maze.carve_path():
                 self.renderer.visited = maze.visited
@@ -44,7 +42,7 @@ class MazeController:
 
                 self._move_cursor_top()
                 self.renderer.render()
-                time.sleep(0.0001)
+                # time.sleep(0.0001)
 
             self._reset_animation_state()
             for current_position in solver.dead_end_fill():
@@ -52,7 +50,7 @@ class MazeController:
 
                 self._move_cursor_top()
                 self.renderer.render()
-                time.sleep(0.0001)
+                # time.sleep(0.0001)
         finally:
             self._show_cursor()
 
@@ -92,7 +90,6 @@ class MazeController:
                             self.config.exit
                         )
                         self.process_maze(new_maze)
-
                     elif user_choice == 2:
                         self.renderer.show_path = not self.renderer.show_path
 
