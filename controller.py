@@ -24,6 +24,7 @@ class MazeController:
 
     def process_maze(self, maze: MazeGenerator) -> None:
         self.renderer.grid = maze.grid
+        self.renderer.pattern_42_cells = maze.pattern_42_cells
 
         self._animate_generation(maze)
         self._reset_animation_state()

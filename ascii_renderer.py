@@ -22,11 +22,7 @@ class Colors:
         '\033[32m'
     ]
 
-    # --- Cor para o número 42 ---
-    NUMBER_42 = '\033[38;2;231;150;223m\033[0m'  # Utilizado RGB
-
-    # --- Cor para o número 42 ---
-    NUMBER_42 = '\033[38;2;231;150;223m\033[0m'  # Utilizado RGB
+    NUMBER_42 = '\033[31m\033[0m'
 
     EXPLORER = '\033[102m\033[30m'
     TRAIL = '\033[100m'
@@ -59,6 +55,7 @@ class ASCIIRenderer:
         self.visited = None
         self.current_cell = None
         self.stack = None        
+        self.pattern_42_cells = set()
 
         self.mask_north = 0
         self.mask_south = 0
@@ -121,6 +118,15 @@ class ASCIIRenderer:
                         continue
 
                     center_y, center_x = (y * 2) + 1, (x * 2) + 1
+                    current_coord = (x, y)
+
+                    if current_coord in self.pattern_42_cells:
+                        char_42 = f"{Colors.NUMBER_42}{Symbols.WALL_BLOCK}{Colors.RESET}"
+
+                        for dy in [-1, 0, 1]:
+                            for dx in [-1, 0, 1]:
+                                display_grid[center_y + dy][center_x + dx] = char_42
+                        continue
 
                     display_grid[center_y][center_x] = self._get_cell_visual(
                         (x, y))
@@ -147,6 +153,14 @@ class ASCIIRenderer:
                     center_y, center_x = (y * 2) + 1, (x * 2) + 1
                     current_coord = (x, y)
                     visual = self._get_cell_visual(current_coord)
+
+                    if current_coord in self.pattern_42_cells:
+                        char_42 = f"{Colors.NUMBER_42}{Symbols.WALL_BLOCK}{Colors.RESET}"
+
+                        for dy in [-1, 0, 1]:
+                            for dx in [-1, 0, 1]:
+                                display_grid[center_y + dy][center_x + dx] = char_42
+                        continue
 
                     if visual == Symbols.EMPTY and logical_cell == all_walls_mask:
                         pass
