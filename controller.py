@@ -3,6 +3,7 @@ from config import Config
 from solver import MazeSolver
 from ascii_renderer import ASCIIRenderer, Colors
 from mazegen import MazeGenerator
+from output import MazeOutput
 
 
 class MazeController:
@@ -30,6 +31,10 @@ class MazeController:
         self._animate_generation(maze, solver)
         self._reset_animation_state()
         self._solve_and_attach_path(solver)
+
+        exportador = MazeOutput(maze.grid, self.config.entry, self.config.exit,
+                                self.renderer.path)
+        exportador.save_maze(self.config.output_file)
 
     def _animate_generation(self, maze: MazeGenerator, solver: MazeSolver) -> None:
         self._clear_screen()
