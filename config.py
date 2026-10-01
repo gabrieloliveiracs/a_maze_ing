@@ -42,17 +42,17 @@ class Config:
                         raise KeyError(key)
                 except KeyError as error:
                     raise ValueError(
-                        f"Chave desconhecida no arquivo config: {error.args[0]}"
+                        f"Unknown config key: {error.args[0]}"
                     ) from error
                 except ValueError as error:
                     raise ValueError(
-                        f"Valor inválido na linha config: {line}"
+                        f"Invalid value on config line: {line}"
                     ) from error
 
         if (width is None or height is None or entry is None or exit_point is None
                 or output_file is None or perfect is None):
             raise ValueError(
-                "Config deve definir WIDTH, HEIGHT, ENTRY, EXIT, OUTPUT_FILE e PERFECT"
+                "Config must define WIDTH, HEIGHT, ENTRY, EXIT, OUTPUT_FILE, and PERFECT"
             )
 
         return cls(

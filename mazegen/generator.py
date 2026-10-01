@@ -42,14 +42,12 @@ class MazeGenerator:
         self.visited.add((start_x, start_y))
         self.stack.append((start_x, start_y))
 
-        while len(self.stack) > 0:
+        while self.stack:
             curr_x, curr_y = self.stack[-1]
-
             unvisited = self._get_unvisited_neighbors(curr_x, curr_y)
 
             if unvisited:
                 direction, (next_x, next_y) = choice(unvisited)
-
                 self.grid[curr_y][curr_x] &= ~direction
 
                 opposite = OPPOSITE_WALL[direction]
@@ -60,7 +58,38 @@ class MazeGenerator:
             else:
                 self.stack.pop()
 
-            yield (curr_x, curr_y)
+            yield curr_x, curr_y
+
+    def prim_path(self) -> Iterator[Tuple[int, int]]:
+        start = self.entry
+        self.visited.add(start)
+        frontier = [
+            (start, direction, neighbor)
+            for direction, neighbor in self._get_unvisited_neighbors(*start)
+        ]
+
+        while frontier:
+            source, direction, destination = choice(frontier)
+            frontier.remove((source, direction, destination))
+
+            if destination in self.visited:
+                continue
+
+            source_x, source_y = source
+            destination_x, destination_y = destination
+            self.grid[source_y][source_x] &= ~direction
+            opposite = OPPOSITE_WALL[direction]
+            self.grid[destination_y][destination_x] &= ~opposite
+
+            self.visited.add(destination)
+            frontier.extend(
+                (destination, next_direction, neighbor)
+                for next_direction, neighbor in self._get_unvisited_neighbors(
+                    destination_x, destination_y
+                )
+            )
+
+            yield destination
 
     def _inject_42(self) -> None:
         """Um '42' visível, formado por células fechadas"""
