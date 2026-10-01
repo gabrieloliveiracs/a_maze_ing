@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Optional, Tuple
 
 
 @dataclass
@@ -9,14 +9,27 @@ class Config:
     entry: Tuple[int, int]
     exit: Tuple[int, int]
     output_file: str
-    perfect: bool
+    perfect: bool = False
+    seed: Optional[int] = None
+
+    def __post_init__(self) -> None:
+        if self.width < 9 or self.height < 7:
+            raise ValueError("Maze dimensions must be at least 9x7 to fit the 42 pattern")
+        if len(self.entry) != 2 or len(self.exit) != 2:
+            raise ValueError("Entry and exit must each contain x,y coordinates")
+        if self.entry == self.exit:
+            raise ValueError("Entry and exit must be different cells")
+        for name, (x, y) in (("Entry", self.entry), ("Exit", self.exit)):
+            if not (0 <= x < self.width and 0 <= y < self.height):
+                raise ValueError(f"{name} must be inside the maze bounds")
 
     @classmethod
     def from_file(cls, file_path: str) -> "Config":
         width = height = None
         entry = exit_point = None
         output_file = None
-        perfect = None
+        perfect = False
+        seed = None
 
         with open(file_path, 'r') as f:
             for line in f:
@@ -37,7 +50,12 @@ class Config:
                     elif key == 'OUTPUT_FILE':
                         output_file = val
                     elif key == 'PERFECT':
-                        perfect = val.lower() == 'true'
+                        normalized = val.lower()
+                        if normalized not in ('true', 'false'):
+                            raise ValueError("PERFECT must be true or false")
+                        perfect = normalized == 'true'
+                    elif key == 'SEED':
+                        seed = int(val)
                     else:
                         raise KeyError(key)
                 except KeyError as error:
@@ -50,9 +68,9 @@ class Config:
                     ) from error
 
         if (width is None or height is None or entry is None or exit_point is None
-                or output_file is None or perfect is None):
+            or output_file is None):
             raise ValueError(
-                "Config must define WIDTH, HEIGHT, ENTRY, EXIT, OUTPUT_FILE, and PERFECT"
+            "Config must define WIDTH, HEIGHT, ENTRY, EXIT, and OUTPUT_FILE"
             )
 
         return cls(
@@ -62,4 +80,5 @@ class Config:
             exit=exit_point,
             output_file=output_file,
             perfect=perfect,
+            seed=seed,
         )

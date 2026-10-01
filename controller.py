@@ -71,6 +71,13 @@ class MazeController:
                 self.renderer.render()
                 time.sleep(animation_delay)
 
+            if not self.config.perfect:
+                for current_position in maze.braid():
+                    self.renderer.current_cell = current_position
+                    self._move_cursor_top()
+                    self.renderer.render()
+                    time.sleep(animation_delay)
+
             self._reset_animation_state()
             for current_position in solver.dead_end_fill():
                 self.renderer.current_cell = current_position
@@ -140,7 +147,8 @@ class MazeController:
                         self.config.width,
                         self.config.height,
                         self.config.entry,
-                        self.config.exit
+                        self.config.exit,
+                        self.config.seed,
                     )
                     self.process_maze(new_maze)
                 elif user_choice == 1:
