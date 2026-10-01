@@ -8,7 +8,7 @@ from mazegen import (
 
 
 class MazeSolver:
-    def __init__(self, maze: MazeGenerator, algorithm="dead-end-fill"):
+    def __init__(self, maze: MazeGenerator):
         self.grid = maze.grid
         self.width = maze.width
         self.height = maze.height

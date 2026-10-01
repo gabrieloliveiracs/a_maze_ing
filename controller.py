@@ -94,8 +94,7 @@ class MazeController:
         self.renderer.stack = None
 
     def _solve_and_attach_path(self, solver: MazeSolver) -> None:
-        if hasattr(solver, 'path'):
-            self.renderer.path = solver.path
+        self.renderer.path = solver.path
 
     def run(self, initial_maze: MazeGenerator) -> None:
         self.process_maze(initial_maze)

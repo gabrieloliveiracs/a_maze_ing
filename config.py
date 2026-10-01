@@ -13,8 +13,8 @@ class Config:
     seed: Optional[int] = None
 
     def __post_init__(self) -> None:
-        if self.width < 9 or self.height < 7:
-            raise ValueError("Maze dimensions must be at least 9x7 to fit the 42 pattern")
+        if self.width < 1 or self.height < 1:
+            raise ValueError("Maze dimensions must be positive")
         if len(self.entry) != 2 or len(self.exit) != 2:
             raise ValueError("Entry and exit must each contain x,y coordinates")
         if self.entry == self.exit:

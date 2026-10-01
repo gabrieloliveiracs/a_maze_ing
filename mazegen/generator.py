@@ -2,7 +2,6 @@ from typing import Tuple, Iterator, Optional
 from random import Random
 from .constants import (
     ALL_WALLS,
-    WALL_N, WALL_E, WALL_S, WALL_W,
     OPPOSITE_WALL,
     DIRECTION_OFFSETS,
     OFFSETS_42
@@ -12,8 +11,8 @@ from .constants import (
 class MazeGenerator:
     def __init__(self, width: int, height: int, entry: Tuple[int, int],
                  exit: Tuple[int, int], seed: Optional[int] = None) -> None:
-        if width < 9 or height < 7:
-            raise ValueError("Maze dimensions must be at least 9x7 to fit the 42 pattern")
+        if width < 1 or height < 1:
+            raise ValueError("Maze dimensions must be positive")
         if len(entry) != 2 or len(exit) != 2:
             raise ValueError("Entry and exit must each contain x,y coordinates")
         if entry == exit:
@@ -103,6 +102,10 @@ class MazeGenerator:
             yield destination
 
     def _inject_42(self) -> None:
+        if self.width < 9 or self.height < 7:
+            print("Error: Maze size does not allow the '42' pattern.")
+            return
+
         center_x = self.width // 2
         center_y = self.height // 2
 
@@ -116,81 +119,28 @@ class MazeGenerator:
             self.pattern_42_cells.add(cell)
 
     def braid(self) -> Iterator[Tuple[int, int]]:
-        expected_visited = {
-            (x, y)
-            for y in range(self.height)
-            for x in range(self.width)
-        }
-        if self.visited != expected_visited:
-            raise RuntimeError("Generate the maze before braiding it")
-
-        loops = 0
-        while True:
-            dead_ends = self._get_real_dead_ends()
-            if len(dead_ends) <= 2 and loops >= 2:
-                return
-
-            sources = dead_ends if len(dead_ends) > 2 else [
-                (x, y)
-                for y in range(self.height)
-                for x in range(self.width)
-                if (x, y) not in self.pattern_42_cells
-            ]
-            candidates = []
-            for x, y in sources:
-                for direction, (dx, dy) in DIRECTION_OFFSETS.items():
-                    next_x, next_y = x + dx, y + dy
-                    neighbor = (next_x, next_y)
-                    if not (0 <= next_x < self.width and 0 <= next_y < self.height):
-                        continue
-                    if neighbor in self.pattern_42_cells:
-                        continue
-                    if not self.grid[y][x] & direction:
-                        continue
-
-                    self.grid[y][x] &= ~direction
-                    opposite = OPPOSITE_WALL[direction]
-                    self.grid[next_y][next_x] &= ~opposite
-                    creates_open_area = self._has_open_3x3_area()
-                    self.grid[y][x] |= direction
-                    self.grid[next_y][next_x] |= opposite
-
-                    if not creates_open_area:
-                        candidates.append((x, y, direction, next_x, next_y))
-
-            if not candidates:
-                raise ValueError(
-                    "Cannot satisfy playable-maze loop and dead-end limits "
-                    "without opening a 3x3 area"
-                )
-
-            self.rng.shuffle(candidates)
-            x, y, direction, next_x, next_y = candidates[0]
-            self.grid[y][x] &= ~direction
-            opposite = OPPOSITE_WALL[direction]
-            self.grid[next_y][next_x] &= ~opposite
-            loops += 1
-            yield x, y
-
-    def _get_real_dead_ends(self) -> list:
-        dead_ends = []
         for y in range(self.height):
             for x in range(self.width):
                 if (x, y) in self.pattern_42_cells:
                     continue
-                if len(self._get_open_neighbors(x, y)) != 1:
-                    continue
-
-                has_openable_wall = any(
-                    0 <= x + dx < self.width
-                    and 0 <= y + dy < self.height
-                    and (x + dx, y + dy) not in self.pattern_42_cells
-                    and self.grid[y][x] & direction
-                    for direction, (dx, dy) in DIRECTION_OFFSETS.items()
-                )
-                if has_openable_wall:
-                    dead_ends.append((x, y))
-        return dead_ends
+                
+                if len(self._get_open_neighbors(x, y)) == 1:
+                    
+                    valid_walls = [
+                        (direction, x + dx, y + dy)
+                        for direction, (dx, dy) in DIRECTION_OFFSETS.items()
+                        if 0 <= x + dx < self.width and 0 <= y + dy < self.height
+                        and (x + dx, y + dy) not in self.pattern_42_cells
+                        and self.grid[y][x] & direction
+                    ]
+                    
+                    if valid_walls:
+                        direction, next_x, next_y = self.rng.choice(valid_walls)
+                        
+                        self.grid[y][x] &= ~direction
+                        self.grid[next_y][next_x] &= ~OPPOSITE_WALL[direction]
+                        
+                        yield x, y
 
     def _get_open_neighbors(self, x: int, y: int) -> list:
         return [
@@ -200,18 +150,3 @@ class MazeGenerator:
             and 0 <= y + dy < self.height
             and not self.grid[y][x] & direction
         ]
-
-    def _has_open_3x3_area(self) -> bool:
-        for top_y in range(self.height - 2):
-            for left_x in range(self.width - 2):
-                if all(
-                    not self.grid[y][x] & direction
-                    for y in range(top_y, top_y + 3)
-                    for x in range(left_x, left_x + 3)
-                    for direction in (
-                        ([WALL_E] if x < left_x + 2 else [])
-                        + ([WALL_S] if y < top_y + 2 else [])
-                    )
-                ):
-                    return True
-        return False
