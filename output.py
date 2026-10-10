@@ -1,8 +1,14 @@
 from typing import List, Tuple
 
+
 class MazeOutput:
-    def __init__(self, grid: List[List[int]], entry: Tuple[int, int],
-                 exit_point: Tuple[int, int], path: List[Tuple[int, int]]) -> None:
+    def __init__(
+        self,
+        grid: List[List[int]],
+        entry: Tuple[int, int],
+        exit_point: Tuple[int, int],
+        path: List[Tuple[int, int]],
+    ) -> None:
         self.grid = grid
         self.entry = entry
         self.exit_point = exit_point
@@ -10,7 +16,7 @@ class MazeOutput:
 
     def save_maze(self, file_name: str) -> None:
         with open(file_name, "w") as file:
-                
+
             for line in self.grid:
                 for brick in line:
                     file.write(f"{brick:X}")
@@ -24,9 +30,13 @@ class MazeOutput:
 
             for i in range(len(self.path) - 1):
                 current, next = self.path[i], self.path[i + 1]
-                if current[0] < next[0]: string_path += "E"
-                elif current[0] > next[0]: string_path += "W"
-                elif current[1] < next[1]: string_path += "S"
-                elif current[1] > next[1]: string_path += "N"
-                
+                if current[0] < next[0]:
+                    string_path += "E"
+                elif current[0] > next[0]:
+                    string_path += "W"
+                elif current[1] < next[1]:
+                    string_path += "S"
+                elif current[1] > next[1]:
+                    string_path += "N"
+
             file.write(string_path + "\n")

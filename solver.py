@@ -1,7 +1,8 @@
+from typing import List, Tuple
+
 from mazegen import MazeGenerator
 from mazegen import (
     ALL_WALLS,
-    WALL_N, WALL_E, WALL_S, WALL_W,
     OPPOSITE_WALL,
     DIRECTION_OFFSETS
 )
@@ -14,7 +15,7 @@ class MazeSolver:
         self.height = maze.height
         self.entry = maze.entry
         self.exit = maze.exit
-        self.path = []
+        self.path: List[Tuple[int, int]] = []
 
     def _get_open_neighbors(self, maze, x, y):
         open_neighbors = []

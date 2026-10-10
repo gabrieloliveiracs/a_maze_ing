@@ -1,4 +1,4 @@
-from typing import Tuple, Iterator, Optional
+from typing import Iterator, List, Optional, Set, Tuple
 from random import Random
 from .constants import (
     ALL_WALLS,
@@ -14,7 +14,8 @@ class MazeGenerator:
         if width < 1 or height < 1:
             raise ValueError("Maze dimensions must be positive")
         if len(entry) != 2 or len(exit) != 2:
-            raise ValueError("Entry and exit must each contain x,y coordinates")
+            raise ValueError(
+                "Entry and exit must each contain x,y coordinates")
         if entry == exit:
             raise ValueError("Entry and exit must be different cells")
         for name, (x, y) in (("Entry", entry), ("Exit", exit)):
@@ -30,9 +31,9 @@ class MazeGenerator:
             [ALL_WALLS for _ in range(self.width)]
             for _ in range(self.height)
         ]
-        self.visited = set()
-        self.stack = []
-        self.pattern_42_cells = set()
+        self.visited: Set[Tuple[int, int]] = set()
+        self.stack: List[Tuple[int, int]] = []
+        self.pattern_42_cells: Set[Tuple[int, int]] = set()
         self._inject_42()
 
     def _get_unvisited_neighbors(self, x: int, y: int) -> list:
@@ -103,8 +104,10 @@ class MazeGenerator:
 
     def _inject_42(self) -> None:
         if self.width < 9 or self.height < 7:
-            print("Error: Maze size does not allow the '42' pattern.")
-            return
+            raise ValueError(
+                "Maze dimensions are too small for the required '42' pattern "
+                "(minimum 9 columns by 7 rows)"
+            )
 
         center_x = self.width // 2
         center_y = self.height // 2
@@ -114,7 +117,8 @@ class MazeGenerator:
             cell_y = center_y + offset_y
             cell = (cell_x, cell_y)
             if cell == self.entry or cell == self.exit:
-                raise ValueError("Entry and exit cannot be inside the 42 pattern")
+                raise ValueError(
+                    "Entry and exit cannot be inside the 42 pattern")
             self.visited.add(cell)
             self.pattern_42_cells.add(cell)
 
@@ -123,23 +127,27 @@ class MazeGenerator:
             for x in range(self.width):
                 if (x, y) in self.pattern_42_cells:
                     continue
-                
+
                 if len(self._get_open_neighbors(x, y)) == 1:
-                    
+
                     valid_walls = [
                         (direction, x + dx, y + dy)
                         for direction, (dx, dy) in DIRECTION_OFFSETS.items()
-                        if 0 <= x + dx < self.width and 0 <= y + dy < self.height
+                        if (
+                            0 <= x + dx < self.width
+                            and 0 <= y + dy < self.height
+                        )
                         and (x + dx, y + dy) not in self.pattern_42_cells
                         and self.grid[y][x] & direction
                     ]
-                    
+
                     if valid_walls:
-                        direction, next_x, next_y = self.rng.choice(valid_walls)
-                        
+                        direction, next_x, next_y = self.rng.choice(
+                            valid_walls)
+
                         self.grid[y][x] &= ~direction
                         self.grid[next_y][next_x] &= ~OPPOSITE_WALL[direction]
-                        
+
                         yield x, y
 
     def _get_open_neighbors(self, x: int, y: int) -> list:

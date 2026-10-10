@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Set, Tuple
 from mazegen.constants import DIRECTION_OFFSETS
 from config import Config
 
@@ -52,11 +52,11 @@ class ASCIIRenderer:
         self.config = config
         self.show_path = True
         self.color_idx = 0
-        self.visited = None
-        self.current_cell = None
-        self.stack = None
+        self.visited: Optional[Set[Coordinate]] = None
+        self.current_cell: Optional[Coordinate] = None
+        self.stack: Optional[List[Coordinate]] = None
 
-        self.pattern_42_cells = set()
+        self.pattern_42_cells: Set[Coordinate] = set()
         self.mask_north = 0
         self.mask_south = 0
         self.mask_east = 0
@@ -82,7 +82,10 @@ class ASCIIRenderer:
         expanded_width = (2 * maze_width) + 1
         expanded_height = (2 * maze_height) + 1
 
-        return [[wall_char for _ in range(expanded_width)] for _ in range(expanded_height)]
+        return [
+            [wall_char for _ in range(expanded_width)]
+            for _ in range(expanded_height)
+        ]
 
     def _get_cell_visual(self, coord: Coordinate) -> str:
         if self.current_cell is not None and coord == self.current_cell:
@@ -137,26 +140,58 @@ class ASCIIRenderer:
         width, height = self._get_display_dimensions()
         return [[Symbols.EMPTY for _ in range(width)] for _ in range(height)]
 
-    def _get_display_coordinates(self, maze_x: int, maze_y: int) -> Tuple[int, int]:
-        return (maze_x * 2) + 1, (maze_y * 2) + 1
+    def _get_display_coordinates(
+        self,
+        maze_x: int,
+        maze_y: int,
+    ) -> Tuple[int, int]:
+        return (
+            (maze_x * 2) + 1,
+            (maze_y * 2) + 1,
+        )
 
-    def _get_passage_visual(self, curr_coord: Coordinate, neighbor_coord: Coordinate) -> str:
+    def _get_passage_visual(
+        self,
+        curr_coord: Coordinate,
+        neighbor_coord: Coordinate,
+    ) -> str:
         # connect trail during animation
-        if self.stack and (curr_coord in self.stack) and (neighbor_coord in self.stack):
+        if (
+            self.stack
+            and curr_coord in self.stack
+            and neighbor_coord in self.stack
+        ):
             return f"{Colors.TRAIL}  {Colors.RESET}"
 
         # connect shortest path
         if self.show_path:
             def is_path_node(coord: Coordinate) -> bool:
-                return coord in self.path or coord == self.entry or coord == self.exit_point
+                return (
+                    coord in self.path
+                    or coord == self.entry
+                    or coord == self.exit_point
+                )
 
             if is_path_node(curr_coord) and is_path_node(neighbor_coord):
                 return Symbols.PATH_TRAIL
 
         return Symbols.EMPTY
 
-    def _draw_cell(self, grid: List[List[str]], cx: int, cy: int, logical_cell: int, coord: Coordinate, wall_char: str) -> None:
-        all_walls = self.mask_north | self.mask_south | self.mask_east | self.mask_west
+    def _draw_cell(
+        self,
+        grid: List[List[str]],
+        cx: int,
+        cy: int,
+        logical_cell: int,
+        coord: Coordinate,
+        wall_char: str,
+    ) -> None:
+        all_walls = (
+            self.mask_north
+            | self.mask_south
+            | self.mask_east
+            | self.mask_west
+        )
         visual = self._get_cell_visual(coord)
 
         if visual == Symbols.EMPTY and logical_cell == all_walls:
@@ -167,26 +202,34 @@ class ASCIIRenderer:
         if self._has_wall(logical_cell, self.mask_north):
             grid[cy - 1][cx] = wall_char
         else:
-            grid[cy -
-                 1][cx] = self._get_passage_visual(coord, (coord[0], coord[1] - 1))
+            grid[cy - 1][cx] = self._get_passage_visual(
+                coord,
+                (coord[0], coord[1] - 1),
+            )
 
         if self._has_wall(logical_cell, self.mask_south):
             grid[cy + 1][cx] = wall_char
         else:
-            grid[cy +
-                 1][cx] = self._get_passage_visual(coord, (coord[0], coord[1] + 1))
+            grid[cy + 1][cx] = self._get_passage_visual(
+                coord,
+                (coord[0], coord[1] + 1),
+            )
 
         if self._has_wall(logical_cell, self.mask_east):
             grid[cy][cx + 1] = wall_char
         else:
-            grid[cy][cx +
-                     1] = self._get_passage_visual(coord, (coord[0] + 1, coord[1]))
+            grid[cy][cx + 1] = self._get_passage_visual(
+                coord,
+                (coord[0] + 1, coord[1]),
+            )
 
         if self._has_wall(logical_cell, self.mask_west):
             grid[cy][cx - 1] = wall_char
         else:
-            grid[cy][cx -
-                     1] = self._get_passage_visual(coord, (coord[0] - 1, coord[1]))
+            grid[cy][cx - 1] = self._get_passage_visual(
+                coord,
+                (coord[0] - 1, coord[1]),
+            )
 
         # corners
         grid[cy - 1][cx - 1] = grid[cy - 1][cx + 1] = wall_char

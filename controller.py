@@ -1,5 +1,5 @@
 import time
-from simple_term_menu import TerminalMenu
+from simple_term_menu import TerminalMenu  # type: ignore[import-untyped]
 from config import Config
 from solver import MazeSolver
 from ascii_renderer import ASCIIRenderer, Colors
@@ -48,11 +48,19 @@ class MazeController:
         self._reset_animation_state()
         self._solve_and_attach_path(solver)
 
-        exportador = MazeOutput(maze.grid, self.config.entry, self.config.exit,
-                                self.renderer.path)
+        exportador = MazeOutput(
+            maze.grid,
+            self.config.entry,
+            self.config.exit,
+            self.renderer.path,
+        )
         exportador.save_maze(self.config.output_file)
 
-    def _animate_generation(self, maze: MazeGenerator, solver: MazeSolver) -> None:
+    def _animate_generation(
+        self,
+        maze: MazeGenerator,
+        solver: MazeSolver,
+    ) -> None:
         self._clear_screen()
         self._hide_cursor()
         try:
@@ -111,7 +119,8 @@ class MazeController:
                     else "Recursive Backtracker"
                 )
                 next_algorithm_name = (
-                    "Recursive Backtracker" if self.generation_algorithm == "prim"
+                    "Recursive Backtracker"
+                    if self.generation_algorithm == "prim"
                     else "Prim"
                 )
                 animation_speed_name = {
@@ -124,7 +133,8 @@ class MazeController:
                 menu_options = [
                     "Generate new map",
                     "Hide path" if self.renderer.show_path else "Show path",
-                    f"Generation algorithm: {algorithm_name} (switch to {next_algorithm_name})",
+                    "Generation algorithm: "
+                    f"{algorithm_name} (switch to {next_algorithm_name})",
                     f"Animation speed: {animation_speed_name}",
                     "Change wall color",
                     "Exit",
@@ -154,7 +164,9 @@ class MazeController:
                     self.renderer.show_path = not self.renderer.show_path
                 elif user_choice == 2:
                     self.generation_algorithm = (
-                        "dfs" if self.generation_algorithm == "prim" else "prim"
+                        "dfs"
+                        if self.generation_algorithm == "prim"
+                        else "prim"
                     )
                 elif user_choice == 3:
                     current_speed_index = self.animation_speed_options.index(
@@ -163,10 +175,13 @@ class MazeController:
                     next_speed_index = (
                         current_speed_index + 1
                     ) % len(self.animation_speed_options)
-                    self.animation_speed = self.animation_speed_options[next_speed_index]
+                    self.animation_speed = (
+                        self.animation_speed_options[next_speed_index]
+                    )
                 elif user_choice == 4:
                     self.renderer.color_idx = (
-                        self.renderer.color_idx + 1) % len(Colors.WALLS)
+                        self.renderer.color_idx + 1
+                    ) % len(Colors.WALLS)
 
         except KeyboardInterrupt:
             self._show_cursor()
