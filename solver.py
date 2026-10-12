@@ -82,7 +82,8 @@ class MazeSolver:
                 break
 
             curr_x, curr_y = current
-            open_neighbors = self._get_open_neighbors(self.grid, curr_x, curr_y)
+            open_neighbors = self._get_open_neighbors(
+                self.grid, curr_x, curr_y)
 
             for direction, (nx, ny) in open_neighbors:
                 neighbor = (nx, ny)

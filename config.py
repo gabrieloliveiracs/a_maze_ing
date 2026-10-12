@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Iterable, Optional, Tuple, cast
-
+import re
 
 REQUIRED_KEYS = ("WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE")
 KNOWN_KEYS = set(REQUIRED_KEYS) | {"PERFECT", "SEED"}
@@ -129,6 +129,9 @@ class Config:
                 raise ValueError("expected exactly two coordinates")
             return coordinates[0], coordinates[1]
         if key == "OUTPUT_FILE":
+            pattern = re.compile(r"^.+\.txt$")
+            if not pattern.match(value):
+                raise ValueError("output file needs to have valid .txt format")
             return value
         if key == "PERFECT":
             normalized = value.lower()
