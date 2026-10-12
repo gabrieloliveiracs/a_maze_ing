@@ -46,6 +46,7 @@ class MazeController:
         solver = MazeSolver(maze)
         self._animate_generation(maze, solver)
         self._reset_animation_state()
+        solver.solver_bfs()
         self._solve_and_attach_path(solver)
 
         exportador = MazeOutput(

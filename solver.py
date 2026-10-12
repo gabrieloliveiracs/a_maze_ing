@@ -69,3 +69,33 @@ class MazeSolver:
         for y in range(self.height):
             for x in range(self.width):
                 self.grid[y][x] = original_grid[y][x]
+
+    def solver_bfs(self) -> None:
+        queue = [self.entry]
+
+        came_from = {self.entry: None}
+
+        while queue:
+            current = queue.pop(0)
+
+            if current == self.exit:
+                break
+
+            curr_x, curr_y = current
+            open_neighbors = self._get_open_neighbors(self.grid, curr_x, curr_y)
+
+            for direction, (nx, ny) in open_neighbors:
+                neighbor = (nx, ny)
+
+                if neighbor not in came_from:
+                    queue.append(neighbor)
+                    came_from[neighbor] = current
+
+        self.path = []
+        atual = self.exit
+
+        while atual is not None:
+            self.path.append(atual)
+            atual = came_from.get(atual)
+
+        self.path.reverse()
