@@ -70,7 +70,7 @@ class MazeSolver:
             for x in range(self.width):
                 self.grid[y][x] = original_grid[y][x]
 
-    def solver_bfs(self) -> None:
+    def solver_bfs(self):
         queue = [self.entry]
 
         came_from = {self.entry: None}
@@ -85,6 +85,8 @@ class MazeSolver:
             open_neighbors = self._get_open_neighbors(
                 self.grid, curr_x, curr_y)
 
+            yield curr_x, curr_y
+
             for direction, (nx, ny) in open_neighbors:
                 neighbor = (nx, ny)
 
@@ -93,10 +95,10 @@ class MazeSolver:
                     came_from[neighbor] = current
 
         self.path = []
-        atual = self.exit
+        current = self.exit
 
-        while atual is not None:
-            self.path.append(atual)
-            atual = came_from.get(atual)
+        while current is not None:
+            self.path.append(current)
+            current = came_from.get(current)
 
         self.path.reverse()

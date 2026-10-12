@@ -49,13 +49,13 @@ class MazeController:
         solver.solver_bfs()
         self._solve_and_attach_path(solver)
 
-        exportador = MazeOutput(
+        exporter = MazeOutput(
             maze.grid,
             self.config.entry,
             self.config.exit,
             self.renderer.path,
         )
-        exportador.save_maze(self.config.output_file)
+        exporter.save_maze(self.config.output_file)
 
     def _animate_generation(
         self,
@@ -88,12 +88,22 @@ class MazeController:
                     time.sleep(animation_delay)
 
             self._reset_animation_state()
-            for current_position in solver.dead_end_fill():
-                self.renderer.current_cell = current_position
+            if self.config.perfect:
+                for current_position in solver.dead_end_fill():
+                    self.renderer.current_cell = current_position
 
-                self._move_cursor_top()
-                self.renderer.render()
-                time.sleep(animation_delay)
+                    self._move_cursor_top()
+                    self.renderer.render()
+                    time.sleep(animation_delay)
+            else:
+                for current_position in solver.solver_bfs():
+                    self.renderer.current_cell = current_position
+                    solver.path.append(current_position)
+                    self._solve_and_attach_path(solver)
+                    self._move_cursor_top()
+                    self.renderer.render()
+                    time.sleep(animation_delay)
+
         finally:
             self._show_cursor()
 
