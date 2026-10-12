@@ -76,36 +76,32 @@ class MazeController:
                 self.renderer.current_cell = current_position
                 self.renderer.stack = maze.stack
 
-                self._move_cursor_top()
-                self.renderer.render()
-                time.sleep(animation_delay)
+                self._render_animation_frame(animation_delay)
 
             if not self.config.perfect:
                 for current_position in maze.braid():
                     self.renderer.current_cell = current_position
-                    self._move_cursor_top()
-                    self.renderer.render()
-                    time.sleep(animation_delay)
+                    self._render_animation_frame(animation_delay)
 
             self._reset_animation_state()
             if self.config.perfect:
                 for current_position in solver.dead_end_fill():
                     self.renderer.current_cell = current_position
-
-                    self._move_cursor_top()
-                    self.renderer.render()
-                    time.sleep(animation_delay)
+                    self._render_animation_frame(animation_delay)
             else:
                 for current_position in solver.solver_bfs():
                     self.renderer.current_cell = current_position
                     solver.path.append(current_position)
                     self._solve_and_attach_path(solver)
-                    self._move_cursor_top()
-                    self.renderer.render()
-                    time.sleep(animation_delay)
+                    self._render_animation_frame(animation_delay)
 
         finally:
             self._show_cursor()
+
+    def _render_animation_frame(self, animation_delay: float) -> None:
+        self._move_cursor_top()
+        self.renderer.render()
+        time.sleep(animation_delay)
 
     def _reset_animation_state(self) -> None:
         self.renderer.visited = None
