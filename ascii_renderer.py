@@ -22,7 +22,13 @@ class Colors:
         '\033[32m'
     ]
 
-    NUMBER_42 = '\033[31m'
+    NUMBER_42 = [
+        '\033[96m',
+        '\033[34m',
+        '\033[35m',
+        '\033[97m',
+        '\033[92m'
+    ]
 
     EXPLORER = '\033[102m\033[30m'
     TRAIL = '\033[100m'
@@ -33,7 +39,7 @@ class Symbols:
     EMPTY = "  "
     START_POINT = f"{Colors.START}SS{Colors.RESET}"
     EXIT_POINT = f"{Colors.END}EE{Colors.RESET}"
-    PATH_TRAIL = f"{Colors.TRAIL}..{Colors.RESET}"
+    PATH_TRAIL = f"{Colors.TRAIL}··{Colors.RESET}"
 
 
 class ASCIIRenderer:
@@ -236,7 +242,10 @@ class ASCIIRenderer:
         grid[cy + 1][cx - 1] = grid[cy + 1][cx + 1] = wall_char
 
     def _apply_pattern_42(self, grid: List[List[str]]) -> None:
-        char_42 = f"{Colors.NUMBER_42}{Symbols.WALL_BLOCK}{Colors.RESET}"
+        char_42 = (
+            f"{Colors.NUMBER_42[self.color_idx]}"
+            f"{Symbols.WALL_BLOCK}{Colors.RESET}"
+        )
 
         for maze_x, maze_y in self.pattern_42_cells:
             center_x, center_y = self._get_display_coordinates(maze_x, maze_y)
