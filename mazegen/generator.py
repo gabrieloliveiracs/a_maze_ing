@@ -60,7 +60,6 @@ class MazeGenerator:
             if unvisited:
                 direction, (next_x, next_y) = self.rng.choice(unvisited)
                 self.grid[curr_y][curr_x] &= ~direction
-
                 opposite = OPPOSITE_WALL[direction]
                 self.grid[next_y][next_x] &= ~opposite
 

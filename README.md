@@ -1,1 +1,144 @@
-# a_maze_ing
+*This project has been created as part of the 42 curriculum by gabrielo, hsilva-d.*
+
+## Description
+
+**A-Maze-ing** is a Python-based terminal application designed to generate, display, and solve mazes. The project's goal is to provide an interactive, animated visualization of maze generation and solving algorithms directly in the console. It features an intuitive terminal UI that allows users to seamlessly switch between generation algorithms, adjust animation speeds, and toggle path visibility. A unique requirement of this project is the automatic injection of a "42" structural pattern into the center of the generated mazes.
+
+## Instructions
+
+The project requires Python 3 and relies on an external dependency for the terminal menu. A `Makefile` is provided to streamline the setup and execution process.
+
+**Installation:**
+To install the required dependencies (specifically `simple-term-menu>=1.6,<2`), run:
+
+```bash
+make install
+```
+
+**Execution:**
+To generate a maze using the default configuration file, run:
+
+```bash
+make run
+```
+
+
+Alternatively, you can manually run the script and pass a specific configuration file as an argument:
+
+```bash
+python3 a_maze_ing.py config.txt
+
+```
+
+**Development & Linting:**
+
+* Clean cache files: `make clean`
+
+* Run linters (`flake8` and `mypy`): `make lint` or `make lint-strict`
+
+* Run with debugger: `make debug`
+
+
+## Resources
+
+* **Classic References:**
+* *Maze Generation Algorithms:* Wikipedia entries and standard computer science literature on Prim's Algorithm and the Recursive Backtracker (Depth-First Search) routing.
+* *Pathfinding:* Fundamentals of Breadth-First Search (BFS) for shortest-path traversal.
+
+
+* **AI Usage:** Artificial Intelligence was utilized in this project primarily for documentation generation (including the formatting of this README), and flake8/mypy compliance.
+
+## Configuration File Structure
+
+The project uses a plain text configuration file with a strict `KEY=VALUE` format. Blank lines and lines starting with `#` are ignored.
+
+The complete structure includes the following keys:
+
+* **WIDTH**: An integer defining the width of the maze.
+
+
+* **HEIGHT**: An integer defining the height of the maze.
+
+
+* **ENTRY**: The X, Y coordinates for the starting point, separated by a comma (e.g., `0,0`).
+
+
+* **EXIT**: The X, Y coordinates for the end point, separated by a comma (e.g., `5,6`).
+
+
+* **OUTPUT_FILE**: A string specifying the destination file, which must end in `.txt`.
+
+
+* **PERFECT**: A boolean (`True` or `False`) determining if the maze should be perfect (no loops) or braided.
+
+
+* **SEED** *(Optional)*: An integer to seed the random number generator for reproducible mazes.
+
+
+
+## Maze Generation Algorithms
+
+The project utilizes two primary maze generation algorithms:
+
+1. **Prim's Algorithm:** Implemented in `prim_path`, this algorithm grows the maze outward from the entry point by keeping a frontier of unvisited neighbor cells and randomly connecting them.
+
+
+2. **Recursive Backtracker (DFS):** Implemented in `carve_path`, this algorithm uses a stack to plunge deeply into the grid until it hits a dead end, then backtracks to carve new paths.
+
+
+
+**Why these were chosen:**
+These algorithms were selected because they produce highly contrasting maze textures. Prim's algorithm generates mazes with many short, branching dead ends (higher radial complexity), while the Recursive Backtracker produces mazes with long, winding, and intricate corridors (high "river" factor). This gives the user diverse visual outputs when toggling between them in the interactive menu.
+
+## Reusable Code
+
+The core logic is heavily decoupled from the terminal interface, making specific parts of the code highly reusable:
+
+* **`MazeGenerator` (in `generator.py`):** This class handles pure matrix math, bitwise wall tracking, and grid data structures independently of the UI. It can be imported into any graphical framework (like Pygame or the MLX interface stubbed in `display.py`) to serve as a backend engine.
+
+
+* **`MazeSolver` (in `solver.py`):** The BFS and Dead-End Filling algorithms operate directly on the raw grid data. They simply yield coordinates as they process, allowing any external frontend to animate the logic step-by-step.
+
+
+
+## Team & Project Management
+
+* **Roles of each team member:** Gabriel Oliveira dos Santos and Hugo Silva De Almeida collaborated on the architecture. Responsibilities were divided between core algorithmic implementations (generation and solving) and the interactive terminal rendering/UI layer.
+
+
+* **Anticipated planning and how it evolved:** The project initially focused on generating a static raw text output. As the underlying matrix manipulation proved stable, the scope evolved to include an animated visualization using ANSI escape codes and a terminal menu interface.
+
+
+* **What worked well and what could be improved:** The separation of concerns between `controller.py`, `ascii_renderer.py`, and `generator.py` allowed for rapid iteration on the UI without breaking the math. Improvements could be made in rendering performance for massive mazes, as updating the terminal screen frame-by-frame can become a bottleneck at extremely large dimensions.
+
+
+* **Specific tools used:**
+* **Python 3** for core execution.
+
+
+* **simple-term-menu** for the interactive command-line interface.
+
+
+* **Make** for build and execution scripting.
+
+
+* **flake8** and **mypy** for strict typing and static code analysis.
+
+
+
+
+
+## Advanced Features
+
+This project implements several advanced capabilities beyond standard maze generation:
+
+* **Interactive Terminal Controller:** A live menu allows users to dynamically swap between Prim and DFS algorithms, adjust animation speeds (Auto, Slow, Normal, Fast), toggle the shortest path visualization, and change the console rendering colors.
+
+
+* **Braided Mazes:** If `PERFECT=False` is set in the configuration, the engine runs a `braid` method that systematically removes dead ends, creating loops and multiple viable paths to the exit.
+
+
+* **Multiple Solvers:** Includes both a standard Breadth-First Search (BFS) for finding the optimal path and a visually distinct "Dead-End Fill" algorithm that solves the maze by progressively sealing off non-viable routes.
+
+
+* **42 Pattern Injection:** The generator forces a hardcoded structural pattern shaped like the number "42" into the center of the grid space using `_inject_42()`, ensuring the maze routing smoothly adapts around it without breaking solvability.

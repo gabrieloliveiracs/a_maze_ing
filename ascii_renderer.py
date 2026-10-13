@@ -108,7 +108,6 @@ class ASCIIRenderer:
         return Symbols.EMPTY
 
     def render(self) -> None:
-        is_animated = self.visited is not None
         wall_char = self._get_wall_character()
 
         display_grid = self._initialize_display_grid()
@@ -117,7 +116,7 @@ class ASCIIRenderer:
             for maze_x, cell_walls in enumerate(row):
                 coord = (maze_x, maze_y)
 
-                if is_animated and coord not in self.visited:
+                if self.visited and coord not in self.visited:
                     continue
 
                 display_x, display_y = self._get_display_coordinates(

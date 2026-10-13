@@ -93,7 +93,7 @@ class MazeController:
                     self.renderer.current_cell = current_position
                     solver.path.append(current_position)
                     self._solve_and_attach_path(solver)
-                    self._render_animation_frame(animation_delay)
+                    self._render_animation_frame(animation_delay + 0.05)
 
         finally:
             self._show_cursor()

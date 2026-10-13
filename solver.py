@@ -17,7 +17,9 @@ class MazeSolver:
         self.exit = maze.exit
         self.path: List[Tuple[int, int]] = []
 
-    def _get_open_neighbors(self, maze, x, y):
+    def _get_open_neighbors(
+        self, maze, x, y
+    ) -> List[Tuple[int, Tuple[int, int]]]:
         open_neighbors = []
         for direction, (dx, dy) in DIRECTION_OFFSETS.items():
             nx, ny = x + dx, y + dy
