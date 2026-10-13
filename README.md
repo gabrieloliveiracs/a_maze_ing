@@ -142,3 +142,78 @@ This project implements several advanced capabilities beyond standard maze gener
 
 
 * **42 Pattern Injection:** The generator forces a hardcoded structural pattern shaped like the number "42" into the center of the grid space using `_inject_42()`, ensuring the maze routing smoothly adapts around it without breaking solvability.
+
+
+
+
+# MazeGen Module Documentation
+
+The `mazegen` module is a standalone, reusable library for generating and solving mazes.
+
+## 1\. Instantiation and Basic Example
+
+To use the generator in your own projects, simply import the `MazeGenerator` class and initialize it with your desired dimensions and entry/exit coordinates.
+
+```
+from mazegen import MazeGenerator
+
+# Create a basic 10x10 maze
+# Entry at top-left (0, 0), Exit at bottom-right (9, 9)
+maze = MazeGenerator(
+    width=10,
+    height=10,
+    entry=(0, 0),
+    exit=(9, 9)
+)
+
+# Carve the paths using the default generator
+for _ in maze.carve_path():
+    pass
+```
+
+## 2\. Passing Custom Parameters
+
+You can fully customize the maze size, entry and exit points, and even provide a specific seed for reproducibility.
+
+```
+from mazegen import MazeGenerator
+
+custom_maze = MazeGenerator(
+    width=30,
+    height=20,
+    entry=(0, 0),
+    exit=(29, 19),
+    seed=42  # Ensures the same maze is generated every time
+)
+```
+
+## 3\. Accessing the Generated Structure
+
+Once generated, the maze structure is stored in a 2D list (matrix) using bitwise integer representation for the walls. You can access it directly via the `grid` attribute.
+
+```
+# Access the 2D matrix
+matrix = custom_maze.grid
+
+# Check the integer value of a specific cell (e.g., x=5, y=5)
+cell_walls = matrix[5][5]
+```
+
+## 4\. Accessing a Solution
+
+The module also provides a `MazeSolver` to calculate the shortest path. You can access the solution through the `path` attribute, which returns a list of coordinates `(x, y)` from the entry to the exit.
+
+```
+from mazegen import MazeSolver
+
+# Instantiate the solver passing the generated maze
+solver = MazeSolver(custom_maze)
+
+# Calculate the shortest path using Breadth-First Search (BFS)
+solver.solve_bfs()
+
+# Access the solution coordinates
+shortest_path = solver.path
+
+print(f"Path to exit: {shortest_path}")
+```
