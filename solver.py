@@ -38,6 +38,16 @@ class MazeSolver:
         return len(self._get_open_neighbors(maze, x, y)) == 1
 
     def dead_end_fill(self) -> Iterator[Tuple[int, int]]:
+        """Remove dead ends from a temporary copy of the maze.
+
+        The original grid is restored after the traversal completes.
+
+        Yields:
+            Coordinates of cells removed during dead-end filling.
+
+        Returns:
+            An iterator over eliminated cell coordinates.
+        """
         dead_ends = []
 
         original_grid = [row[:] for row in self.grid]
@@ -79,6 +89,16 @@ class MazeSolver:
                 self.grid[y][x] = original_grid[y][x]
 
     def solver_bfs(self) -> Iterator[Tuple[int, int]]:
+        """Find the shortest path with breadth-first search.
+
+        The resulting path is stored in ``self.path``.
+
+        Yields:
+            Coordinates as they are visited before reaching the exit.
+
+        Returns:
+            An iterator over visited cell coordinates.
+        """
         queue = [self.entry]
 
         came_from: Dict[
