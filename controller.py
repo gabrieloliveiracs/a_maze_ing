@@ -1,5 +1,7 @@
 import time
-from simple_term_menu import TerminalMenu  # type: ignore[import-untyped]
+from typing import Dict
+
+from simple_term_menu import TerminalMenu
 from config import Config
 from solver import MazeSolver
 from ascii_renderer import ASCIIRenderer, Colors
@@ -28,11 +30,15 @@ class MazeController:
         print("\033[H\n", end="")
 
     def _get_animation_delay(self, maze: MazeGenerator) -> float:
-        preset_delays = {"slow": 0.04, "normal": 0.012, "fast": 0.003}
+        preset_delays: Dict[str, float] = {
+            "slow": 0.04,
+            "normal": 0.012,
+            "fast": 0.003,
+        }
         if self.animation_speed != "auto":
             return preset_delays[self.animation_speed]
 
-        estimated_frames = max(1, maze.width * maze.height)
+        estimated_frames = max(1, int(maze.width) * int(maze.height))
         if self.generation_algorithm == "dfs":
             estimated_frames *= 2
 

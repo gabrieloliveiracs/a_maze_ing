@@ -1,15 +1,15 @@
-from typing import List, Tuple
+from typing import Iterator, List, Tuple
 
 from mazegen import MazeGenerator
 from mazegen import (
     ALL_WALLS,
     OPPOSITE_WALL,
-    DIRECTION_OFFSETS
+    DIRECTION_OFFSETS,
 )
 
 
 class MazeSolver:
-    def __init__(self, maze: MazeGenerator):
+    def __init__(self, maze: MazeGenerator) -> None:
         self.grid = maze.grid
         self.width = maze.width
         self.height = maze.height
@@ -18,7 +18,7 @@ class MazeSolver:
         self.path: List[Tuple[int, int]] = []
 
     def _get_open_neighbors(
-        self, maze, x, y
+        self, maze: List[List[int]], x: int, y: int
     ) -> List[Tuple[int, Tuple[int, int]]]:
         open_neighbors = []
         for direction, (dx, dy) in DIRECTION_OFFSETS.items():
@@ -28,10 +28,10 @@ class MazeSolver:
                     open_neighbors.append((direction, (nx, ny)))
         return open_neighbors
 
-    def _is_dead_end(self, maze, x, y):
+    def _is_dead_end(self, maze: List[List[int]], x: int, y: int) -> bool:
         return len(self._get_open_neighbors(maze, x, y)) == 1
 
-    def dead_end_fill(self):
+    def dead_end_fill(self) -> Iterator[Tuple[int, int]]:
         dead_ends = []
 
         original_grid = [row[:] for row in self.grid]
@@ -72,7 +72,7 @@ class MazeSolver:
             for x in range(self.width):
                 self.grid[y][x] = original_grid[y][x]
 
-    def solver_bfs(self):
+    def solver_bfs(self) -> Iterator[Tuple[int, int]]:
         queue = [self.entry]
 
         came_from = {self.entry: None}
