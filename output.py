@@ -2,6 +2,15 @@ from typing import List, Tuple
 
 
 class MazeOutput:
+    """Serialize a maze grid and its solution path to a text file.
+
+    Args:
+        grid: Maze cells represented by wall bitmasks.
+        entry: Starting cell coordinates.
+        exit_point: Ending cell coordinates.
+        path: Coordinates belonging to the solution path.
+    """
+
     def __init__(
         self,
         grid: List[List[int]],

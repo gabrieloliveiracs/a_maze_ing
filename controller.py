@@ -10,6 +10,13 @@ from output import MazeOutput
 
 
 class MazeController:
+    """Coordinate maze generation, animation, solving, and user interaction.
+
+    Args:
+        renderer: Terminal renderer used for maze output.
+        config: Validated maze and output configuration.
+    """
+
     def __init__(self, renderer: ASCIIRenderer, config: Config) -> None:
         self.renderer = renderer
         self.config = config

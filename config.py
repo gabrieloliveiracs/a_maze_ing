@@ -8,6 +8,8 @@ KNOWN_KEYS = set(REQUIRED_KEYS) | {"PERFECT", "SEED"}
 
 @dataclass
 class Config:
+    """Store and validate maze settings loaded from a configuration file."""
+
     width: int
     height: int
     entry: Tuple[int, int]

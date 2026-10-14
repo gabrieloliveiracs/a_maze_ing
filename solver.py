@@ -1,4 +1,4 @@
-from typing import Iterator, List, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from mazegen import MazeGenerator
 from mazegen import (
@@ -9,6 +9,12 @@ from mazegen import (
 
 
 class MazeSolver:
+    """Solve a generated maze and expose progress for animation.
+
+    Args:
+        maze: Generated maze to solve.
+    """
+
     def __init__(self, maze: MazeGenerator) -> None:
         self.grid = maze.grid
         self.width = maze.width
@@ -75,7 +81,9 @@ class MazeSolver:
     def solver_bfs(self) -> Iterator[Tuple[int, int]]:
         queue = [self.entry]
 
-        came_from = {self.entry: None}
+        came_from: Dict[
+            Tuple[int, int], Optional[Tuple[int, int]]
+        ] = {self.entry: None}
 
         while queue:
             current = queue.pop(0)
@@ -97,10 +105,10 @@ class MazeSolver:
                     came_from[neighbor] = current
 
         self.path = []
-        current = self.exit
+        path_current: Optional[Tuple[int, int]] = self.exit
 
-        while current is not None:
-            self.path.append(current)
-            current = came_from.get(current)
+        while path_current is not None:
+            self.path.append(path_current)
+            path_current = came_from.get(path_current)
 
         self.path.reverse()

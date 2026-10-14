@@ -43,6 +43,16 @@ class Symbols:
 
 
 class ASCIIRenderer:
+    """Render maze generation and solving progress in the terminal.
+
+    Args:
+        grid: Maze cells represented by wall bitmasks.
+        entry: Starting cell coordinates.
+        exit_point: Ending cell coordinates.
+        path: Coordinates belonging to the solution path.
+        config: Maze configuration used by the renderer.
+    """
+
     def __init__(
         self,
         grid: MazeGrid,
