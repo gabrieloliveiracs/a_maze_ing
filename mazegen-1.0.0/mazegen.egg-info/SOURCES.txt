@@ -1,0 +1,7 @@
+LICENSE.md
+README.md
+pyproject.toml
+mazegen.egg-info/PKG-INFO
+mazegen.egg-info/SOURCES.txt
+mazegen.egg-info/dependency_links.txt
+mazegen.egg-info/top_level.txt

@@ -1,0 +1,235 @@
+Metadata-Version: 2.4
+Name: mazegen
+Version: 1.0.0
+Summary: A standalone, reusable maze generator and solver.
+Author-email: Hugo Silva de Almeida <hsilva-d@student.42sp.org.br>, Gabriel Oliveira dos Santos <gabrielo@student.42sp.org.br>
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Dynamic: license-file
+
+*This project has been created as part of the 42 curriculum by gabrielo, hsilva-d.*
+
+## Description
+
+**A-Maze-ing** is a Python-based terminal application designed to generate, display, and solve mazes. The project's goal is to provide an interactive, animated visualization of maze generation and solving algorithms directly in the console. It features an intuitive terminal UI that allows users to seamlessly switch between generation algorithms, adjust animation speeds, and toggle path visibility. A unique requirement of this project is the automatic injection of a "42" structural pattern into the center of the generated mazes.
+
+## Instructions
+
+The project requires Python 3 and relies on two dependencies: the external
+`simple-term-menu` package for the terminal menu and the bundled `mazegen`
+package for maze generation. A `Makefile` is provided to streamline the setup
+and execution process.
+
+**Installation:**
+To install the required dependencies, including the bundled
+`mazegen-1.0.0.tar.gz` package, run:
+
+```bash
+make install
+```
+
+**Execution:**
+To generate a maze using the default configuration file, run:
+
+```bash
+make run
+```
+
+
+Alternatively, you can manually run the script and pass a specific configuration file as an argument:
+
+```bash
+python3 a_maze_ing.py config.txt
+```
+
+**Development & Linting:**
+
+* Clean cache files: `make clean`
+
+* Run linters (`flake8` and `mypy`): `make lint` or `make lint-strict`
+
+* Run with debugger: `make debug`
+
+
+## Resources
+
+* **Classic References:**
+* *Maze Generation Algorithms:* Wikipedia entries and standard computer science literature on Prim's Algorithm and the Recursive Backtracker (Depth-First Search) routing.
+* *Pathfinding:* Fundamentals of Breadth-First Search (BFS) for shortest-path traversal.
+
+
+* **AI Usage:** Artificial Intelligence was utilized in this project primarily for documentation generation (including the formatting of this README), and flake8/mypy compliance.
+
+## Configuration File Structure
+
+The project uses a plain text configuration file with a strict `KEY=VALUE` format. Blank lines and lines starting with `#` are ignored.
+
+The complete structure includes the following keys:
+
+* **WIDTH**: An integer defining the width of the maze.
+
+
+* **HEIGHT**: An integer defining the height of the maze.
+
+
+* **ENTRY**: The X, Y coordinates for the starting point, separated by a comma (e.g., `0,0`).
+
+
+* **EXIT**: The X, Y coordinates for the end point, separated by a comma (e.g., `5,6`).
+
+
+* **OUTPUT_FILE**: A string specifying the destination file, which must end in `.txt`.
+
+
+* **PERFECT**: A boolean (`True` or `False`) determining if the maze should be perfect (no loops) or braided.
+
+
+* **SEED** *(Optional)*: An integer to seed the random number generator for reproducible mazes.
+
+
+
+## Maze Generation Algorithms
+
+The project utilizes two primary maze generation algorithms:
+
+1. **Prim's Algorithm:** Implemented in `prim_path`, this algorithm grows the maze outward from the entry point by keeping a frontier of unvisited neighbor cells and randomly connecting them.
+
+
+2. **Recursive Backtracker (DFS):** Implemented in `carve_path`, this algorithm uses a stack to plunge deeply into the grid until it hits a dead end, then backtracks to carve new paths.
+
+
+
+**Why these were chosen:**
+These algorithms were selected because they produce highly contrasting maze textures. Prim's algorithm generates mazes with many short, branching dead ends (higher radial complexity), while the Recursive Backtracker produces mazes with long, winding, and intricate corridors (high "river" factor). This gives the user diverse visual outputs when toggling between them in the interactive menu.
+
+## Reusable Code
+
+The core logic is heavily decoupled from the terminal interface, making specific parts of the code highly reusable:
+
+* **`MazeGenerator` (in `generator.py`):** This class handles pure matrix math, bitwise wall tracking, and grid data structures independently of the UI. It can be imported into any graphical framework (like Pygame or the MLX interface stubbed in `display.py`) to serve as a backend engine.
+
+
+* **`MazeSolver` (in `solver.py`):** The BFS and Dead-End Filling algorithms operate directly on the raw grid data. They simply yield coordinates as they process, allowing any external frontend to animate the logic step-by-step.
+
+
+
+## Team & Project Management
+
+* **Roles of each team member:** Gabriel Oliveira dos Santos and Hugo Silva De Almeida collaborated on the architecture. Responsibilities were divided between core algorithmic implementations (generation and solving) and the interactive terminal rendering/UI layer.
+
+
+* **Anticipated planning and how it evolved:** The project initially focused on generating a static raw text output. As the underlying matrix manipulation proved stable, the scope evolved to include an animated visualization using ANSI escape codes and a terminal menu interface.
+
+
+* **What worked well and what could be improved:** The separation of concerns between `controller.py`, `ascii_renderer.py`, and `generator.py` allowed for rapid iteration on the UI without breaking the math. Improvements could be made in rendering performance for massive mazes, as updating the terminal screen frame-by-frame can become a bottleneck at extremely large dimensions.
+
+
+* **Specific tools used:**
+* **Python 3** for core execution.
+
+
+* **simple-term-menu** for the interactive command-line interface.
+
+
+* **Make** for build and execution scripting.
+
+
+* **flake8** and **mypy** for strict typing and static code analysis.
+
+
+
+
+
+## Advanced Features
+
+This project implements several advanced capabilities beyond standard maze generation:
+
+* **Interactive Terminal Controller:** A live menu allows users to dynamically swap between Prim and DFS algorithms, adjust animation speeds (Auto, Slow, Normal, Fast), toggle the shortest path visualization, and change the console rendering colors.
+
+
+* **Braided Mazes:** If `PERFECT=False` is set in the configuration, the engine runs a `braid` method that systematically removes dead ends, creating loops and multiple viable paths to the exit.
+
+
+* **Multiple Solvers:** Includes both a standard Breadth-First Search (BFS) for finding the optimal path and a visually distinct "Dead-End Fill" algorithm that solves the maze by progressively sealing off non-viable routes.
+
+
+* **42 Pattern Injection:** The generator forces a hardcoded structural pattern shaped like the number "42" into the center of the grid space using `_inject_42()`, ensuring the maze routing smoothly adapts around it without breaking solvability.
+
+
+
+
+# MazeGen Module Documentation
+
+The `mazegen` module is a standalone, reusable library for generating and solving mazes.
+
+## 1\. Instantiation and Basic Example
+
+To use the generator in your own projects, simply import the `MazeGenerator` class and initialize it with your desired dimensions and entry/exit coordinates.
+
+```
+from mazegen import MazeGenerator
+
+# Create a basic 10x10 maze
+# Entry at top-left (0, 0), Exit at bottom-right (9, 9)
+maze = MazeGenerator(
+    width=10,
+    height=10,
+    entry=(0, 0),
+    exit=(9, 9)
+)
+
+# Carve the paths using the default generator
+for _ in maze.carve_path():
+    pass
+```
+
+## 2\. Passing Custom Parameters
+
+You can fully customize the maze size, entry and exit points, and even provide a specific seed for reproducibility.
+
+```
+from mazegen import MazeGenerator
+
+custom_maze = MazeGenerator(
+    width=30,
+    height=20,
+    entry=(0, 0),
+    exit=(29, 19),
+    seed=42  # Ensures the same maze is generated every time
+)
+```
+
+## 3\. Accessing the Generated Structure
+
+Once generated, the maze structure is stored in a 2D list (matrix) using bitwise integer representation for the walls. You can access it directly via the `grid` attribute.
+
+```
+# Access the 2D matrix
+matrix = custom_maze.grid
+
+# Check the integer value of a specific cell (e.g., x=5, y=5)
+cell_walls = matrix[5][5]
+```
+
+## 4\. Accessing a Solution
+
+The module also provides a `MazeSolver` to calculate the shortest path. You can access the solution through the `path` attribute, which returns a list of coordinates `(x, y)` from the entry to the exit.
+
+```
+from mazegen import MazeSolver
+
+# Instantiate the solver passing the generated maze
+solver = MazeSolver(custom_maze)
+
+# Calculate the shortest path using Breadth-First Search (BFS)
+solver.solve_bfs()
+
+# Access the solution coordinates
+shortest_path = solver.path
+
+print(f"Path to exit: {shortest_path}")
+```
