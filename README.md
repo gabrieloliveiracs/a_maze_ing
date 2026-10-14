@@ -6,10 +6,14 @@
 
 ## Instructions
 
-The project requires Python 3 and relies on an external dependency for the terminal menu. A `Makefile` is provided to streamline the setup and execution process.
+The project requires Python 3 and relies on two dependencies: the external
+`simple-term-menu` package for the terminal menu and the bundled `mazegen`
+package for maze generation. A `Makefile` is provided to streamline the setup
+and execution process.
 
 **Installation:**
-To install the required dependencies (specifically `simple-term-menu>=1.6,<2`), run:
+To install the required dependencies, including the bundled
+`mazegen-1.0.0.tar.gz` package, run:
 
 ```bash
 make install
@@ -27,7 +31,6 @@ Alternatively, you can manually run the script and pass a specific configuration
 
 ```bash
 python3 a_maze_ing.py config.txt
-
 ```
 
 **Development & Linting:**

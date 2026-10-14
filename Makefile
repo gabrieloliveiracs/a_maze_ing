@@ -1,6 +1,6 @@
 .PHONY: install run debug clean lint lint-strict
 
-install: requirements.txt
+install: requirements.txt mazegen-1.0.0.tar.gz
 	pip install -r requirements.txt
 
 run:

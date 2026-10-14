@@ -1,1 +1,2 @@
 simple-term-menu>=1.6,<2
+./mazegen-1.0.0.tar.gz
